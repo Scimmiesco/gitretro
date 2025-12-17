@@ -450,15 +450,17 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                                 onClick={() => setReloadTrigger(prev => prev + 1)}
                                                 className="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
                                                 title="Atualizar commits"
+                                                disabled={loading || (!selectedCommitId && recentCommits.length === 0)}
+
                                             >
-                                                <RefreshCcw size={16} className="text-blue-400" />
+                                                {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCcw size={16} />}
                                             </button>
                                         </div>
 
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
+                                    <div className="flex w-full gap-2">
+                                        <div className="flex flex-col flex-1">
                                             <label className="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Repositório Selecionado</label>
                                             <select
                                                 className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none"
@@ -470,7 +472,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                                 ))}
                                             </select>
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-col flex-1">
+                                            <label className="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Repositório Selecionado</label>
+
                                             <select
                                                 className="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none"
                                                 value={selectedCommitId || (recentCommits.length > 0 ? recentCommits[recentCommits.length - 1].commitId : '')}
@@ -484,33 +488,34 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                                     </option>
                                                 ))}
                                             </select>
-                                            <button
-                                                onClick={async () => {
-                                                    const commitToFetch = selectedCommitId || (recentCommits.length > 0 ? recentCommits[recentCommits.length - 1].commitId : '');
-                                                    if (!commitToFetch || !selectedRepoId || !azureConfig) return;
 
-                                                    setLoading(true);
-                                                    try {
-                                                        const repo = selectedRepos!.find(r => r.id === selectedRepoId);
-                                                        if (!repo) return;
-                                                        const cloneUrl = `https://dev.azure.com/${azureConfig.org}/${repo.project.name}/_git/${repo.name}`;
-                                                        const data = await fetchAzureCommitDiff(cloneUrl, commitToFetch, azureConfig.token);
-                                                        setDiffInput(data.diff);
-                                                        setDescInput(data.description);
-                                                        setStatusMsg({ msg: "Dados do commit carregados!", type: 'success' });
-                                                    } catch (e: any) {
-                                                        setStatusMsg({ msg: "Erro ao carregar commit: " + e.message, type: 'error' });
-                                                    } finally {
-                                                        setLoading(false);
-                                                    }
-                                                }}
-                                                disabled={loading || (!selectedCommitId && recentCommits.length === 0)}
-                                                className="px-3 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold disabled:opacity-50 flex items-center justify-center transition-colors"
-                                                title="Carregar Detalhes do Commit"
-                                            >
-                                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                                            </button>
                                         </div>
+                                        <button
+                                            onClick={async () => {
+                                                const commitToFetch = selectedCommitId || (recentCommits.length > 0 ? recentCommits[recentCommits.length - 1].commitId : '');
+                                                if (!commitToFetch || !selectedRepoId || !azureConfig) return;
+
+                                                setLoading(true);
+                                                try {
+                                                    const repo = selectedRepos!.find(r => r.id === selectedRepoId);
+                                                    if (!repo) return;
+                                                    const cloneUrl = `https://dev.azure.com/${azureConfig.org}/${repo.project.name}/_git/${repo.name}`;
+                                                    const data = await fetchAzureCommitDiff(cloneUrl, commitToFetch, azureConfig.token);
+                                                    setDiffInput(data.diff);
+                                                    setDescInput(data.description);
+                                                    setStatusMsg({ msg: "Dados do commit carregados!", type: 'success' });
+                                                } catch (e: any) {
+                                                    setStatusMsg({ msg: "Erro ao carregar commit: " + e.message, type: 'error' });
+                                                } finally {
+                                                    setLoading(false);
+                                                }
+                                            }}
+                                            disabled={loading || (!selectedCommitId && recentCommits.length === 0)}
+                                            className="px-3 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold disabled:opacity-50 flex items-center justify-center transition-colors"
+                                            title="Carregar Detalhes do Commit"
+                                        >
+                                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                                        </button>
                                     </div>
                                 </div>
                             ) : (
