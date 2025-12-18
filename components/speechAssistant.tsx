@@ -118,11 +118,11 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                 {/* AI Controls */}
                 <div className="bg-gray900 rounded-xl border border-gray800 p-6 shadow-lg animate-fade-in">
                     <h3 className="flex items-center gap-2 text-lg font-bold text-white mb-6 border-b border-gray800 pb-3">
-                        <BrainCircuit className="text-blue-500" /> Gerar Discurso
+                        <BrainCircuit className="text-yellow-500" /> Gerar Discurso
                     </h3>
 
                     <div className="space-y-4">
-                        <label className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === 'daily' ? 'bg-blue-600/10 border-blue-500/50' : 'bg-gray950/50 border-gray800 hover:border-gray600'}`}>
+                        <label className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === 'daily' ? 'bg-yellow-600/10 border-yellow-500/50' : 'bg-gray950/50 border-gray800 hover:border-gray600'}`}>
                             <div className="flex items-center gap-3 mb-2">
                                 <input
                                     type="radio"
@@ -131,14 +131,14 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                                     checked={viewMode === 'daily'}
                                     onChange={() => setViewMode('daily')}
                                 />
-                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === 'daily' ? 'border-blue-500' : 'border-gray600 group-hover:border-gray400'}`}>
-                                    {viewMode === 'daily' && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === 'daily' ? 'border-yellow-500' : 'border-gray600 group-hover:border-gray400'}`}>
+                                    {viewMode === 'daily' && <div className="w-2 h-2 rounded-full bg-yellow-500"></div>}
                                 </div>
-                                <div className="flex items-center gap-2 font-bold text-gray-200">
+                                <div className="flex items-center gap-2 font-bold text-yellow-50">
                                     <Coffee size={16} className="text-orange-500" /> Daily Stand-up
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-500 ml-7">
+                            <p className="text-xs text-yellow-100/70 ml-7">
                                 Foco: Ontem vs Hoje. O que foi feito e impedimentos.
                             </p>
                         </label>
@@ -155,11 +155,11 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === 'sprint' ? 'border-purple-500' : 'border-gray600 group-hover:border-gray400'}`}>
                                     {viewMode === 'sprint' && <div className="w-2 h-2 rounded-full bg-purple-500"></div>}
                                 </div>
-                                <div className="flex items-center gap-2 font-bold text-gray-200">
+                                <div className="flex items-center gap-2 font-bold text-yellow-50">
                                     <Zap size={16} className="text-yellow-500" /> Review da Sprint
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-500 ml-7">
+                            <p className="text-xs text-yellow-100/70 ml-7">
                                 Foco: Entregas de valor, funcionalidades e dematadas.
                             </p>
                         </label>
@@ -176,16 +176,16 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === 'semester' ? 'border-green-500' : 'border-gray600 group-hover:border-gray400'}`}>
                                     {viewMode === 'semester' && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
                                 </div>
-                                <div className="flex items-center gap-2 font-bold text-gray-200">
+                                <div className="flex items-center gap-2 font-bold text-yellow-50">
                                     <Users size={16} className="text-green-500" /> Feedback 1:1
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-500 ml-7">
+                            <p className="text-xs text-yellow-100/70 ml-7">
                                 Foco: Evolução semestral, projetos e colaboração.
                             </p>
                         </label>
 
-                        <label className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === 'year' ? 'bg-indigo-600/10 border-indigo-500/50' : 'bg-gray950/50 border-gray800 hover:border-gray600'}`}>
+                        <label className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === 'year' ? 'bg-yellow-600/10 border-yellow-500/50' : 'bg-gray950/50 border-gray800 hover:border-gray600'}`}>
                             <div className="flex items-center gap-3 mb-2">
                                 <input
                                     type="radio"
@@ -194,14 +194,14 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                                     checked={viewMode === 'year'}
                                     onChange={() => setViewMode('year')}
                                 />
-                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === 'year' ? 'border-indigo-500' : 'border-gray600 group-hover:border-gray400'}`}>
-                                    {viewMode === 'year' && <div className="w-2 h-2 rounded-full bg-indigo-500"></div>}
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === 'year' ? 'border-yellow-500' : 'border-gray600 group-hover:border-gray400'}`}>
+                                    {viewMode === 'year' && <div className="w-2 h-2 rounded-full bg-yellow-500"></div>}
                                 </div>
-                                <div className="flex items-center gap-2 font-bold text-gray-200">
-                                    <CalendarCheck size={16} className="text-indigo-500" /> Retrospectiva Anual
+                                <div className="flex items-center gap-2 font-bold text-yellow-50">
+                                    <CalendarCheck size={16} className="text-yellow-500" /> Retrospectiva Anual
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-500 ml-7">
+                            <p className="text-xs text-yellow-100/70 ml-7">
                                 Foco: Visão holística do ano, constância e marcos.
                             </p>
                         </label>
@@ -216,7 +216,7 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                         <button
                             onClick={generateAiSummary}
                             disabled={generatingAi}
-                            className={`w-full py-4 mt-4 rounded-xl font-bold shadow-lg transition-all transform active:scale-95 flex justify-center items-center gap-2 text-white ${generatingAi ? 'bg-gray800 cursor-not-allowed text-gray-400' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-900/30'}`}
+                            className={`w-full py-4 mt-4 rounded-xl font-bold shadow-lg transition-all transform active:scale-95 flex justify-center items-center gap-2 text-white ${generatingAi ? 'bg-gray800 cursor-not-allowed text-yellow-100/70' : 'bg-gradient-to-r from-yellow-600 to-yellow-600 hover:from-yellow-500 hover:to-yellow-500 shadow-yellow-900/30'}`}
                         >
                             {generatingAi ? (
                                 <>
@@ -246,7 +246,7 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                                 <div className="flex gap-2">
                                     <button
                                         onClick={copyToClipboard}
-                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${copied ? 'bg-green-500/20 text-green-400' : 'bg-gray800 text-gray-400 hover:bg-gray700 hover:text-white'}`}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${copied ? 'bg-green-500/20 text-green-400' : 'bg-gray800 text-yellow-100/70 hover:bg-gray700 hover:text-white'}`}
                                     >
                                         {copied ? <Check size={14} /> : <Copy size={14} />}
                                         {copied ? 'Copiado!' : 'Copiar'}
@@ -254,7 +254,7 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                                 </div>
                             </div>
 
-                            <div className="prose prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-strong:text-blue-400 prose-ul:text-gray-300">
+                            <div className="prose prose-invert max-w-none prose-p:text-yellow-50 prose-headings:text-white prose-strong:text-yellow-400 prose-ul:text-yellow-50">
                                 {/* Split summary by lines and render delicately */}
                                 {aiSummary.split('\n').map((line, i) => (
                                     <p key={i} className={`mb-2 leading-relaxed ${line.startsWith('#') ? 'text-lg font-bold text-white mt-4' : line.startsWith('-') ? 'ml-4' : ''}`}>
@@ -264,17 +264,17 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
                             </div>
 
                             <div className="mt-8 pt-6 border-t border-gray800">
-                                <p className="text-xs text-gray-500 italic text-center">
+                                <p className="text-xs text-yellow-100/70 italic text-center">
                                     Gerado por IA (Gemini 2.0 Flash) • Revisão recomendada antes de falar.
                                 </p>
                             </div>
                         </div>
                     ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-600 p-8 text-center opacity-60">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-yellow-100/70 p-8 text-center opacity-60">
                             <div className="w-24 h-24 bg-gray800 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                                <BrainCircuit size={48} className="text-gray-500" />
+                                <BrainCircuit size={48} className="text-yellow-100/70" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-400 mb-2">Aguardando geração</h3>
+                            <h3 className="text-xl font-bold text-yellow-100/70 mb-2">Aguardando geração</h3>
                             <p className="max-w-md">
                                 Configure o seu contexto ao lado e clique em "Gerar Roteiro" para criar um discurso personalizado para sua Daily ou Review.
                             </p>

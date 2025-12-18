@@ -37,23 +37,23 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
   };
 
   return (
-    <div className="w-full max-w-lg bg-emerald-950 rounded-md p-2 border-2 border-emerald-900 animate-fade-in relative overflow-hidden">
+    <div className="w-full max-w-lg bg-surface-muted rounded-md p-2 border-2 border-primary-dark animate-fade-in relative overflow-hidden">
       {/* Background glow effects */}
-      <div className="absolute top-10 -right-1/3 w-1/2 h-64 bg-yellow-700/20 rounded-full blur-3xl"></div>
-      <div className="absolute -bottom-20 -left-20 w-64 h-1/2 bg-yellow-700/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-10 -right-1/3 w-1/2 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-20 -left-20 w-64 h-1/2 bg-primary/10 rounded-full blur-3xl"></div>
 
       <div className="text-center relative z-10">
         <div className="flex gap-2 align-center justify-center">
-          <h1 className="text-5xl font-extrabold text-yellow-50 tracking-tight self-center">
-            Dev<span className="text-yellow-600">Center</span>
+          <h1 className="text-5xl font-extrabold  tracking-tight self-center">
+            Dev<span className="text-accent">Center</span>
           </h1>
 
           <div className={`rounded-md flex items-center justify-center transform transition-all duration-300`}>
-            {provider === 'github' ? <Github size={32} className="text-yellow-50" /> : <ChartNoAxesGantt size={48} className="text-yellow-50" />}
+            {provider === 'github' ? <Github size={32} className="" /> : <ChartNoAxesGantt size={48} className="" />}
           </div>
         </div>
 
-        <p className="text-yellow-50 font-bold font-mono">
+        <p className="nt-light font-bold font-mono">
           Controle sua vida profissional
         </p>
       </div>
@@ -94,7 +94,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
                 value={primaryInput}
                 onChange={(e) => setPrimaryInput(e.target.value)}
                 placeholder="ex: torvalds"
-                className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-gray-600"
+                className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-yellow-100/70"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder="Ex: InfortechMS"
-                  className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-gray-600"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-yellow-100/70"
                 />
               </div>
               <p className="text-xs text-pretty text-yellow-50/75">O sistema irá buscar o trabalho em <strong className='text-yellow-50'>todos</strong> os projetos e repositórios desta organização.</p>
@@ -131,7 +131,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
                   onChange={(e) => setSecondaryInput(e.target.value)}
                   placeholder="Ex: Scimmiesco, pedro.almeida"
                   required
-                  className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-gray-600"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-yellow-100/70"
                 />
               </div>
               <p className="text-[10px] text-yellow-50/75 text-pretty">Use vírgulas se você comita com identidades diferentes (pessoal/corporativo).</p>
@@ -169,7 +169,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
                 onChange={(e) => setToken(e.target.value)}
                 required={provider === 'azure'}
                 placeholder={provider === 'github' ? "ghp_..." : "Personal Access Token"}
-                className={`w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 transition-all placeholder-gray-600 ${provider === 'azure' ? 'focus:ring-yellow-600/50 focus:border-yellow-600' : 'focus:ring-gray-700 focus:border-gray-500'}`}
+                className={`w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 transition-all placeholder-yellow-100/70 ${provider === 'azure' ? 'focus:ring-yellow-600/50 focus:border-yellow-600' : 'focus:ring-gray-700 focus:border-yellow-100/70'}`}
               />
             </div>
           </div>

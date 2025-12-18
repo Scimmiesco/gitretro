@@ -87,14 +87,14 @@ const CommitDetailModal: React.FC<CommitDetailModalProps> = ({ commit: initialCo
                         <div>
                             <div className="flex items-center gap-3">
                                 <h2 className="text-xl font-bold text-white">Detalhes do Commit</h2>
-                                {loading && <Loader2 size={18} className="animate-spin text-blue-500" />}
+                                {loading && <Loader2 size={18} className="animate-spin text-yellow-500" />}
                             </div>
-                            <p className="text-sm text-gray-400 font-medium mt-0.5">{getCategoryLabel(commit.category)}</p>
+                            <p className="text-sm text-yellow-100/70 font-medium mt-0.5">{getCategoryLabel(commit.category)}</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2.5 hover:bg-gray800 rounded-full transition-colors text-gray-400 hover:text-white"
+                        className="p-2.5 hover:bg-gray800 rounded-full transition-colors text-yellow-100/70 hover:text-white"
                     >
                         <X size={24} />
                     </button>
@@ -109,8 +109,8 @@ const CommitDetailModal: React.FC<CommitDetailModalProps> = ({ commit: initialCo
                             {commit.message}
                         </h3>
                         {/* Body / Description */}
-                        <div className={`bg-gray950 rounded-xl p-5 border border-gray800 text-sm text-gray-300 whitespace-pre-wrap leading-relaxed font-mono ${loading ? 'opacity-50' : ''}`}>
-                            {commit.body || <span className="text-gray-500 italic">Nenhuma descrição detalhada disponível.</span>}
+                        <div className={`bg-gray950 rounded-xl p-5 border border-gray800 text-sm text-yellow-50 whitespace-pre-wrap leading-relaxed font-mono ${loading ? 'opacity-50' : ''}`}>
+                            {commit.body || <span className="text-yellow-100/70 italic">Nenhuma descrição detalhada disponível.</span>}
                         </div>
                         {error && (
                             <p className="text-sm text-red-400 mt-2 flex items-center gap-2">
@@ -122,67 +122,67 @@ const CommitDetailModal: React.FC<CommitDetailModalProps> = ({ commit: initialCo
                     {/* Metadata Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
 
-                        <div className="flex items-center gap-3 text-sm text-gray-400">
-                            <div className="p-2 bg-gray800 rounded-lg text-blue-400">
+                        <div className="flex items-center gap-3 text-sm text-yellow-100/70">
+                            <div className="p-2 bg-gray800 rounded-lg text-yellow-400">
                                 <GitCommit size={18} />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] uppercase font-bold text-gray-500">Hash</span>
-                                <span className="font-mono text-gray-200 select-all">{commit.sha.substring(0, 7)}</span>
+                                <span className="text-[10px] uppercase font-bold text-yellow-100/70">Hash</span>
+                                <span className="font-mono text-yellow-50 select-all">{commit.sha.substring(0, 7)}</span>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                        <div className="flex items-center gap-3 text-sm text-yellow-100/70">
                             <div className="p-2 bg-gray800 rounded-lg text-orange-500">
                                 <Calendar size={18} />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] uppercase font-bold text-gray-500">Data</span>
-                                <span className="text-gray-200">{new Date(commit.date).toLocaleString('pt-BR')}</span>
+                                <span className="text-[10px] uppercase font-bold text-yellow-100/70">Data</span>
+                                <span className="text-yellow-50">{new Date(commit.date).toLocaleString('pt-BR')}</span>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                        <div className="flex items-center gap-3 text-sm text-yellow-100/70">
                             <div className="p-2 bg-gray800 rounded-lg text-emerald-500">
                                 <FolderGit2 size={18} />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] uppercase font-bold text-gray-500">Repositório</span>
-                                <span className="font-medium text-gray-200">{commit.repo}</span>
+                                <span className="text-[10px] uppercase font-bold text-yellow-100/70">Repositório</span>
+                                <span className="font-medium text-yellow-50">{commit.repo}</span>
                             </div>
                         </div>
 
                         {commit.branch && (
-                            <div className="flex items-center gap-3 text-sm text-gray-400">
+                            <div className="flex items-center gap-3 text-sm text-yellow-100/70">
                                 <div className="p-2 bg-gray800 rounded-lg text-purple-500">
                                     <GitBranch size={18} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase font-bold text-gray-500">Branch</span>
-                                    <span className="text-gray-200">{commit.branch}</span>
+                                    <span className="text-[10px] uppercase font-bold text-yellow-100/70">Branch</span>
+                                    <span className="text-yellow-50">{commit.branch}</span>
                                 </div>
                             </div>
                         )}
 
                         {commit.scope && (
-                            <div className="flex items-center gap-3 text-sm text-gray-400">
+                            <div className="flex items-center gap-3 text-sm text-yellow-100/70">
                                 <div className="p-2 bg-gray800 rounded-lg text-cyan-500">
                                     <Tag size={18} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase font-bold text-gray-500">Escopo</span>
-                                    <span className="font-semibold text-gray-200">{commit.scope}</span>
+                                    <span className="text-[10px] uppercase font-bold text-yellow-100/70">Escopo</span>
+                                    <span className="font-semibold text-yellow-50">{commit.scope}</span>
                                 </div>
                             </div>
                         )}
 
                         {commit.context && (
-                            <div className="flex items-center gap-3 text-sm text-gray-400 md:col-span-2">
-                                <div className="p-2 bg-gray800 rounded-lg text-gray-200">
+                            <div className="flex items-center gap-3 text-sm text-yellow-100/70 md:col-span-2">
+                                <div className="p-2 bg-gray800 rounded-lg text-yellow-50">
                                     <FileText size={18} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] uppercase font-bold text-gray-500">Contexto / PR</span>
+                                    <span className="text-[10px] uppercase font-bold text-yellow-100/70">Contexto / PR</span>
                                     <span className="font-medium text-white">{commit.context}</span>
                                 </div>
                             </div>
@@ -193,7 +193,7 @@ const CommitDetailModal: React.FC<CommitDetailModalProps> = ({ commit: initialCo
                     {/* File Changes */}
                     {commit.changes && commit.changes.length > 0 && (
                         <div className="mb-8">
-                            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <h4 className="text-xs font-bold text-yellow-100/70 uppercase tracking-wider mb-4 flex items-center gap-2">
                                 <FileCode size={16} /> Arquivos Alterados ({commit.changes.length})
                             </h4>
                             <div className="bg-gray950 border border-gray800 rounded-xl overflow-hidden">
@@ -202,8 +202,8 @@ const CommitDetailModal: React.FC<CommitDetailModalProps> = ({ commit: initialCo
                                         <div className="flex items-center gap-3 overflow-hidden">
                                             {change.status === 'added' ? <FilePlus size={16} className="text-emerald-500 shrink-0" /> :
                                                 change.status === 'deleted' ? <FileMinus size={16} className="text-rose-500 shrink-0" /> :
-                                                    <FileEdit size={16} className="text-blue-500 shrink-0" />}
-                                            <span className="truncate font-mono text-gray-300 group-hover:text-white transition-colors" title={change.fileName}>{change.fileName}</span>
+                                                    <FileEdit size={16} className="text-yellow-500 shrink-0" />}
+                                            <span className="truncate font-mono text-yellow-50 group-hover:text-white transition-colors" title={change.fileName}>{change.fileName}</span>
                                         </div>
                                         <div className="flex items-center gap-4 shrink-0 ml-4">
                                             {(change.additions !== undefined || change.deletions !== undefined) && (
@@ -213,7 +213,7 @@ const CommitDetailModal: React.FC<CommitDetailModalProps> = ({ commit: initialCo
                                                 </div>
                                             )}
                                             {change.url && (
-                                                <a href={change.url} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-blue-400 transition-colors">
+                                                <a href={change.url} target="_blank" rel="noopener noreferrer" className="text-yellow-100/70 hover:text-yellow-400 transition-colors">
                                                     <ExternalLink size={14} />
                                                 </a>
                                             )}
@@ -230,7 +230,7 @@ const CommitDetailModal: React.FC<CommitDetailModalProps> = ({ commit: initialCo
                             href={commit.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/40 hover:shadow-blue-900/60 active:scale-95 text-sm font-bold"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 text-white rounded-xl hover:bg-yellow-500 transition-all shadow-lg shadow-yellow-900/40 hover:shadow-yellow-900/60 active:scale-95 text-sm font-bold"
                         >
                             <ExternalLink size={18} />
                             Ver no {provider === 'github' ? 'GitHub' : 'Azure DevOps'}

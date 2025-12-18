@@ -212,7 +212,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start p-2 bg-gray-950 font-inter">
+    <div className="min-h-screen flex flex-col items-center justify-start p-2 bg-surface font-inter">
       {error && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-red-50 text-red-600 px-6 py-4 rounded-lg shadow-lg border border-red-100 flex items-center w-full max-w-lg">
           <span className="font-semibold mr-2 shrink-0">Erro:</span>

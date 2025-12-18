@@ -57,8 +57,13 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
         const newSelection = selectedRepoIds.includes(id)
             ? selectedRepoIds.filter(s => s !== id)
             : [...selectedRepoIds, id];
+
         onSelectionChange(newSelection);
     };
+
+    const reposSelecionados = useMemo(() => {
+        return repositories.filter(r => selectedRepoIds.includes(r.id));
+    }, [repositories, selectedRepoIds]);
 
     const toggleFavorite = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
@@ -83,10 +88,10 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-yellow-50 leading-tight">Selecione os repositórios </h2>
-                        <div className="text-xs text-yellow-50/70">
+                        <div className="text-xs text-yellow-100/70">
                             {selectedRepoIds.length === 0
                                 ? "Nenhum repositório selecionado"
-                                : `${selectedRepoIds.length} repositórios ativos`
+                                : `${reposSelecionados.map(r => r.name).join(' - ')}`
                             }
                         </div>
                     </div>
@@ -101,7 +106,6 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                         <span className="text-yellow-50">{selectedRepoIds.length > 0 ? `${selectedRepoIds.length} Selecionados` : 'Selecionar Repositórios'}</span>
                         <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
-                    <span className="text-yellow-50">{selectedRepoIds.length}</span>
                     <button
                         onClick={onConfirm}
                         disabled={isLoading || selectedRepoIds.length === 0}
@@ -122,7 +126,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                                     <input
                                         type="text"
                                         placeholder="Filtrar repositórios..."
-                                        className="placeholder:text-gray-100/70 w-full bg-gray-950 border border-yellow-50 rounded-md pl-9 pr-3 py-2 text-xs text-yellow-50 focus:outline-none focus:border-orange-700"
+                                        className="placeholder:text-yellow-100/70 w-full bg-gray-950 border border-yellow-50 rounded-md pl-9 pr-3 py-2 text-xs text-yellow-50 focus:outline-none focus:border-orange-700"
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}
                                         autoFocus
@@ -161,7 +165,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                                                 </button>
                                                 <div className="min-w-0">
                                                     <div className={`text-sm font-medium truncate ${isSelected ? 'text-orange-600' : 'text-yellow-50'}`}>{repo.name}</div>
-                                                    <div className="text-[10px]  text-yellow-50/70 truncate">{repo.project.name}</div>
+                                                    <div className="text-[10px]  text-yellow-100/70 truncate">{repo.project.name}</div>
                                                 </div>
                                             </div>
                                             {isSelected && <Check size={16} className="text-orange-600 flex-shrink-0 ml-2" />}
@@ -169,7 +173,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                                     );
                                 })}
                                 {filteredRepos.length === 0 && (
-                                    <div className="p-4 text-center text-xs text-gray-500">Nenhum repositório encontrado.</div>
+                                    <div className="p-4 text-center text-xs text-yellow-100/70">Nenhum repositório encontrado.</div>
                                 )}
                             </div>
                         </div>
