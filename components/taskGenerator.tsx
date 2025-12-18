@@ -386,12 +386,12 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
         <div className="space-y-6">
 
             {/* CONFIGURATION PANEL */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-gray900 border border-gray800 rounded-xl overflow-hidden shadow-sm">
                 <button
                     onClick={() => setViewConfig(!viewConfig)}
-                    className="w-full flex items-center justify-between p-4 bg-slate-950/50 hover:bg-slate-900 transition-colors"
+                    className="w-full flex items-center justify-between p-4 bg-gray950/50 hover:bg-gray900 transition-colors"
                 >
-                    <h3 className="font-bold text-slate-200 flex items-center gap-2">
+                    <h3 className="font-bold text-gray-200 flex items-center gap-2">
                         <RotateCcw size={16} className="text-emerald-500" /> Configuração & Origem
                     </h3>
                     {viewConfig ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -402,20 +402,20 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                         {/* 1. Global Fields */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Assigned To</label>
-                                <input type="text" className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm"
+                                <label className="text-xs font-bold uppercase text-gray-500 mb-1 block">Assigned To</label>
+                                <input type="text" className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm"
                                     value={config.assignedTo} onChange={e => setConfig({ ...config, assignedTo: e.target.value })} />
                             </div>
                             <div>
-                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Iteration Path</label>
-                                <input type="text" className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm" placeholder="ex: 35"
+                                <label className="text-xs font-bold uppercase text-gray-500 mb-1 block">Iteration Path</label>
+                                <input type="text" className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm" placeholder="ex: 35"
                                     value={config.iterationPath} onChange={e => setConfig({ ...config, iterationPath: e.target.value })} />
                             </div>
                             <div>
-                                <label className="text-xs font-bold uppercase text-slate-500 mb-1 block">Area Path</label>
+                                <label className="text-xs font-bold uppercase text-gray-500 mb-1 block">Area Path</label>
                                 {azureConfig && selectedRepos ? (
                                     <select
-                                        className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-slate-300 outline-none"
+                                        className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm text-gray-300 outline-none"
                                         value={config.areaPath}
                                         onChange={e => setConfig({ ...config, areaPath: e.target.value })}
                                     >
@@ -423,7 +423,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                         {areaPaths.map(p => <option key={p} value={p}>{p}</option>)}
                                     </select>
                                 ) : (
-                                    <select className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm"
+                                    <select className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm"
                                         value={config.areaPath} onChange={e => setConfig({ ...config, areaPath: e.target.value })}>
                                         <option value="">Selecione...</option>
                                         <option value="SPF-SIAFIC\Refatoração">Refatoração</option>
@@ -433,10 +433,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                             </div>
                         </div>
 
-                        <div className="h-px bg-slate-800 my-4" />
+                        <div className="h-px bg-gray800 my-4" />
 
                         {/* 2. Source Selection */}
-                        <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800">
+                        <div className="bg-gray950/50 p-4 rounded-xl border border-gray800">
                             {azureConfig && selectedRepos ? (
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center gap-2 text-blue-400 font-bold text-sm">
@@ -448,7 +448,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                         <div className="flex items-end">
                                             <button
                                                 onClick={() => setReloadTrigger(prev => prev + 1)}
-                                                className="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
+                                                className="p-2 bg-gray800 rounded-lg hover:bg-gray700 transition-colors"
                                                 title="Atualizar commits"
                                                 disabled={loading || (!selectedCommitId && recentCommits.length === 0)}
 
@@ -461,9 +461,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
 
                                     <div className="flex w-full gap-2">
                                         <div className="flex flex-col flex-1">
-                                            <label className="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Repositório Selecionado</label>
+                                            <label className="text-[10px] font-bold uppercase text-gray-500 mb-1 block">Repositório Selecionado</label>
                                             <select
-                                                className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none"
+                                                className="w-full bg-gray900 border border-gray700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none"
                                                 value={selectedRepoId}
                                                 onChange={(e) => setSelectedRepoId(e.target.value)}
                                             >
@@ -473,10 +473,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                             </select>
                                         </div>
                                         <div className="flex flex-col flex-1">
-                                            <label className="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Repositório Selecionado</label>
+                                            <label className="text-[10px] font-bold uppercase text-gray-500 mb-1 block">Repositório Selecionado</label>
 
                                             <select
-                                                className="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none"
+                                                className="flex-1 bg-gray900 border border-gray700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none"
                                                 value={selectedCommitId || (recentCommits.length > 0 ? recentCommits[recentCommits.length - 1].commitId : '')}
                                                 onChange={(e) => handleCommitSelect(e.target.value)}
                                                 disabled={loading}
@@ -521,33 +521,33 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-60">
                                     {/* Azure Manual */}
-                                    <div className={`p-4 rounded-xl border transition-all ${provider === 'azure' ? 'bg-blue-900/10 border-blue-500/50' : 'bg-slate-950 border-slate-800'}`}>
+                                    <div className={`p-4 rounded-xl border transition-all ${provider === 'azure' ? 'bg-blue-900/10 border-blue-500/50' : 'bg-gray950 border-gray800'}`}>
                                         <h4 className="font-bold text-blue-400 mb-3 flex items-center gap-2">Azure DevOps (Manual)</h4>
                                         <div className="space-y-3">
-                                            <input type="text" placeholder="URL do Repo (Clone URL)" className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs"
+                                            <input type="text" placeholder="URL do Repo (Clone URL)" className="w-full bg-gray900 border border-gray700 rounded p-2 text-xs"
                                                 value={config.azUrl} onChange={e => setConfig({ ...config, azUrl: e.target.value })} />
                                             <div className="flex gap-2">
-                                                <input type="text" placeholder="Commit SHA" className="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs font-mono"
+                                                <input type="text" placeholder="Commit SHA" className="flex-1 bg-gray900 border border-gray700 rounded p-2 text-xs font-mono"
                                                     value={config.azCommit} onChange={e => setConfig({ ...config, azCommit: e.target.value })} />
                                                 <button onClick={fetchAzure} disabled={loading || provider !== 'azure'} className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold disabled:opacity-50">
                                                     {loading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                                                 </button>
                                             </div>
-                                            <input type="password" placeholder="PAT Token (Opcional se já logado)" className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs"
+                                            <input type="password" placeholder="PAT Token (Opcional se já logado)" className="w-full bg-gray900 border border-gray700 rounded p-2 text-xs"
                                                 value={config.azToken} onChange={e => setConfig({ ...config, azToken: e.target.value })} />
                                         </div>
                                     </div>
 
                                     {/* GitHub Manual */}
-                                    <div className={`p-4 rounded-xl border transition-all ${provider === 'github' ? 'bg-slate-800 border-slate-600' : 'bg-slate-950 border-slate-800'}`}>
-                                        <h4 className="font-bold text-slate-300 mb-3 flex items-center gap-2">GitHub (Manual)</h4>
+                                    <div className={`p-4 rounded-xl border transition-all ${provider === 'github' ? 'bg-gray800 border-gray600' : 'bg-gray950 border-gray800'}`}>
+                                        <h4 className="font-bold text-gray-300 mb-3 flex items-center gap-2">GitHub (Manual)</h4>
                                         <div className="space-y-3">
-                                            <input type="text" placeholder="Owner/Repo" className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs"
+                                            <input type="text" placeholder="Owner/Repo" className="w-full bg-gray900 border border-gray700 rounded p-2 text-xs"
                                                 value={config.ghRepo} onChange={e => setConfig({ ...config, ghRepo: e.target.value })} />
                                             <div className="flex gap-2">
-                                                <input type="text" placeholder="Commit SHA" className="flex-1 bg-slate-900 border border-slate-700 rounded p-2 text-xs font-mono"
+                                                <input type="text" placeholder="Commit SHA" className="flex-1 bg-gray900 border border-gray700 rounded p-2 text-xs font-mono"
                                                     value={config.ghCommit} onChange={e => setConfig({ ...config, ghCommit: e.target.value })} />
-                                                <button onClick={fetchGitHub} disabled={loading || provider !== 'github'} className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-bold disabled:opacity-50">
+                                                <button onClick={fetchGitHub} disabled={loading || provider !== 'github'} className="px-3 py-2 bg-gray700 hover:bg-gray600 text-white rounded text-xs font-bold disabled:opacity-50">
                                                     {loading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                                                 </button>
                                             </div>
@@ -559,7 +559,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
 
                         {/* Status Message */}
                         {statusMsg && (
-                            <div className={`p-3 rounded text-xs font-bold flex items-center gap-2 ${statusMsg.type === 'error' ? 'bg-red-500/10 text-red-400' : statusMsg.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
+                            <div className={`p-3 rounded text-xs font-bold flex items-center gap-2 ${statusMsg.type === 'error' ? 'bg-red-500/10 text-red-400' : statusMsg.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-gray800 text-gray-400'}`}>
                                 {statusMsg.msg}
                             </div>
                         )}
@@ -570,18 +570,18 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
             {/* INPUT AREA */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase text-slate-500">Descrição Técnica</label>
+                    <label className="text-xs font-bold uppercase text-gray-500">Descrição Técnica</label>
                     <textarea
-                        className="w-full h-32 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
+                        className="w-full h-32 bg-gray950 border border-gray800 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
                         placeholder="Descreva o que foi feito..."
                         value={descInput}
                         onChange={e => setDescInput(e.target.value)}
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase text-slate-500">Diff / Arquivos Afetados</label>
+                    <label className="text-xs font-bold uppercase text-gray-500">Diff / Arquivos Afetados</label>
                     <textarea
-                        className="w-full h-32 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm font-mono text-slate-400 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
+                        className="w-full h-32 bg-gray950 border border-gray800 rounded-lg p-3 text-sm font-mono text-gray-400 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none"
                         placeholder="Cole o diff ou lista de arquivos..."
                         value={diffInput}
                         onChange={e => setDiffInput(e.target.value)}
@@ -610,13 +610,13 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
             {/* RESULTS AREA */}
             {tasks.length > 0 && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-4">
+                    <div className="flex items-center justify-between border-b border-gray800 pb-2 mb-4">
                         <h3 className="font-bold text-white flex items-center gap-2">
                             <CheckCircle2 className="text-emerald-500" size={18} />
-                            Tarefas Geradas <span className="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">{tasks.length}</span>
+                            Tarefas Geradas <span className="text-xs bg-gray800 px-2 py-0.5 rounded-full text-gray-400">{tasks.length}</span>
                         </h3>
                         <div className="flex gap-2">
-                            <button onClick={() => setTasks([])} className="p-2 text-slate-500 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
+                            <button onClick={() => setTasks([])} className="p-2 text-gray-500 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
                             <button onClick={exportCsv} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold shadow-lg shadow-emerald-900/20 transition-all">
                                 <FileText size={16} /> Exportar CSV
                             </button>
@@ -625,9 +625,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
 
                     <div className="space-y-3">
                         {tasks.map((task, idx) => (
-                            <div key={idx} className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-all group">
+                            <div key={idx} className="bg-gray900 border border-gray800 rounded-xl p-4 shadow-sm hover:border-gray700 transition-all group">
                                 <div className="flex items-start gap-4">
-                                    <div className="mt-1 p-2 bg-slate-950 rounded text-slate-400 font-mono text-xs border border-slate-800">
+                                    <div className="mt-1 p-2 bg-gray950 rounded text-gray-400 font-mono text-xs border border-gray800">
                                         #{task.taskId}
                                     </div>
 
@@ -635,15 +635,15 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                         <div className="flex gap-2">
                                             <input
                                                 type="text"
-                                                className="flex-1 bg-transparent border-b border-transparent hover:border-slate-700 focus:border-blue-500 outline-none text-white font-semibold placeholder-slate-600 transition-colors"
+                                                className="flex-1 bg-transparent border-b border-transparent hover:border-gray700 focus:border-blue-500 outline-none text-white font-semibold placeholder-gray600 transition-colors"
                                                 value={task.customTitle}
                                                 onChange={e => updateTask(idx, 'customTitle', e.target.value)}
                                             />
-                                            <span className="text-[10px] uppercase font-bold text-slate-600 tracking-wider self-center">{task.source}</span>
+                                            <span className="text-[10px] uppercase font-bold text-gray-600 tracking-wider self-center">{task.source}</span>
                                         </div>
 
                                         <textarea
-                                            className="w-full bg-slate-950/50 rounded p-2 text-sm text-slate-300 outline-none border border-transparent focus:border-slate-700 resize-none"
+                                            className="w-full bg-gray950/50 rounded p-2 text-sm text-gray-300 outline-none border border-transparent focus:border-gray700 resize-none"
                                             rows={2}
                                             value={task.coherentDescription}
                                             onChange={e => updateTask(idx, 'coherentDescription', e.target.value)}
@@ -651,9 +651,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
 
                                         <div className="flex flex-wrap items-center gap-4">
                                             <div className="flex flex-col gap-1">
-                                                <label className="text-[10px] font-bold uppercase text-slate-500">Categoria</label>
+                                                <label className="text-[10px] font-bold uppercase text-gray-500">Categoria</label>
                                                 <select
-                                                    className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 outline-none"
+                                                    className="bg-gray950 border border-gray800 rounded px-2 py-1 text-xs text-gray-300 outline-none"
                                                     value={task.kbIndex}
                                                     onChange={e => updateTask(idx, 'kbIndex', parseInt(e.target.value))}
                                                 >
@@ -664,9 +664,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                             </div>
 
                                             <div className="flex flex-col gap-1">
-                                                <label className="text-[10px] font-bold uppercase text-slate-500">Complexidade</label>
+                                                <label className="text-[10px] font-bold uppercase text-gray-500">Complexidade</label>
                                                 <select
-                                                    className={`bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs outline-none font-bold ${task.complexity === 'alta' ? 'text-red-400' : task.complexity === 'media' ? 'text-yellow-400' : 'text-emerald-400'
+                                                    className={`bg-gray950 border border-gray800 rounded px-2 py-1 text-xs outline-none font-bold ${task.complexity === 'alta' ? 'text-red-400' : task.complexity === 'media' ? 'text-yellow-400' : 'text-emerald-400'
                                                         }`}
                                                     value={task.complexity}
                                                     onChange={e => updateTask(idx, 'complexity', e.target.value)}
@@ -678,17 +678,17 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
                                             </div>
 
                                             <div className="flex flex-col gap-1">
-                                                <label className="text-[10px] font-bold uppercase text-slate-500">UST</label>
+                                                <label className="text-[10px] font-bold uppercase text-gray-500">UST</label>
                                                 <div className={`px-2 py-1 rounded text-xs font-mono font-bold border ${badgeColor(task.complexity)}`}>
                                                     {task.ustPoints}
                                                 </div>
                                             </div>
 
                                             <div className="flex flex-col gap-1">
-                                                <label className="text-[10px] font-bold uppercase text-slate-500">Horas</label>
+                                                <label className="text-[10px] font-bold uppercase text-gray-500">Horas</label>
                                                 <input
                                                     type="number"
-                                                    className="w-16 bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-center text-white"
+                                                    className="w-16 bg-gray950 border border-gray800 rounded px-2 py-1 text-xs text-center text-white"
                                                     value={task.estimateMade}
                                                     onChange={e => updateTask(idx, 'estimateMade', parseFloat(e.target.value))}
                                                 />
@@ -696,7 +696,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({ provider, token, username
 
                                             <button
                                                 onClick={() => removeTask(idx)}
-                                                className="ml-auto text-slate-600 hover:text-red-400 transition-colors"
+                                                className="ml-auto text-gray-600 hover:text-red-400 transition-colors"
                                             >
                                                 <Trash2 size={14} />
                                             </button>

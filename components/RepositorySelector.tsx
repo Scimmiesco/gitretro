@@ -74,17 +74,16 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
     const clearSelection = () => onSelectionChange([]);
 
     return (
-        <div className="w-full bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50 shadow-xl rounded-b-xl">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-
+        <div className="w-full sticky top-0 z-50 ">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
                 {/* Header / Trigger */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="p-2 bg-blue-600/10 rounded-lg text-blue-400">
+                    <div className="p-1 rounded-md text-orange-700">
                         <FolderGit2 size={24} />
                     </div>
                     <div>
-                        <h2 className="text-lg font-bold text-white leading-tight">Contexto de Desenvolvimento</h2>
-                        <div className="text-xs text-slate-400">
+                        <h2 className="text-lg font-bold text-yellow-50 leading-tight">Selecione os repositórios </h2>
+                        <div className="text-xs text-yellow-50/70">
                             {selectedRepoIds.length === 0
                                 ? "Nenhum repositório selecionado"
                                 : `${selectedRepoIds.length} repositórios ativos`
@@ -97,42 +96,43 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                 <div className="flex items-center gap-3 w-full md:w-auto relative">
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="flex-1 md:flex-none flex items-center justify-between gap-3 px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-medium text-slate-200 hover:bg-slate-750 transition-colors min-w-[200px]"
+                        className="flex-1 md:flex-none flex items-center justify-between gap-3 px-4 py-2 bg-gray-950 border border-yellow-50 rounded-md text-sm font-medium text-yellow-50 hover:bg-gray-750 transition-colors min-w-[200px]"
                     >
-                        <span>{selectedRepoIds.length > 0 ? `${selectedRepoIds.length} Selecionados` : 'Selecionar Repositórios'}</span>
+                        <span className="text-yellow-50">{selectedRepoIds.length > 0 ? `${selectedRepoIds.length} Selecionados` : 'Selecionar Repositórios'}</span>
                         <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
-
+                    <span className="text-yellow-50">{selectedRepoIds.length}</span>
                     <button
                         onClick={onConfirm}
                         disabled={isLoading || selectedRepoIds.length === 0}
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                        className="
+                        bg-gradient-to-r from-yellow-700 to-yellow-800 hover:from-yellow-600 hover:to-orange-600
+                        px-6 py-2 text-yellow-50 font-bold rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                     >
                         {isLoading ? 'Carregando...' : 'Analisar'}
                     </button>
 
                     {/* Dropdown Panel */}
                     {isOpen && (
-                        <div className="absolute top-full right-0 mt-2 w-full md:w-[400px] max-h-[60vh] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
-
+                        <div className="absolute top-full right-0 mt-2 w-full md:w-[400px] max-h-[60vh] bg-emerald-950 border-2 border-emerald-900 rounded-md flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
                             {/* Search */}
-                            <div className="p-3 border-b border-slate-800 bg-slate-950/50">
+                            <div className="p-3 border-b border-emerald-900 bg-emerald-900/50">
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-100" size={16} />
                                     <input
                                         type="text"
                                         placeholder="Filtrar repositórios..."
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                                        className="placeholder:text-gray-100/70 w-full bg-gray-950 border border-yellow-50 rounded-md pl-9 pr-3 py-2 text-xs text-yellow-50 focus:outline-none focus:border-orange-700"
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}
                                         autoFocus
                                     />
                                 </div>
-                                <div className="flex items-center justify-between mt-2 text-[10px] text-slate-500 px-1">
+                                <div className="flex items-center justify-between mt-2 text-[10px] text-yellow-100/70 px-1">
                                     <span>{filteredRepos.length} encontrados</span>
                                     <div className="flex gap-2">
-                                        <button onClick={selectAll} className="hover:text-blue-400">Todos</button>
-                                        <button onClick={clearSelection} className="hover:text-red-400">Nenhum</button>
+                                        <button onClick={selectAll} className="hover:text-orange-600">Todos</button>
+                                        <button onClick={clearSelection} className="hover:text-red-500">Nenhum</button>
                                     </div>
                                 </div>
                             </div>
@@ -146,27 +146,30 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                                         <div
                                             key={repo.id}
                                             onClick={() => toggleRepo(repo.id)}
-                                            className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors group ${isSelected ? 'bg-blue-900/20 border border-blue-500/30' : 'hover:bg-slate-800 border border-transparent'}`}
+                                            className={`
+                                                flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors group border-2 border-transparent
+                                                 ${isSelected ? 'bg-orange-800/20 border-2 border-orange-700/70' : 'hover:bg-gray-950 hover:border-2 hover:border-yellow-100'}`}
                                         >
                                             <div className="flex items-center gap-3 min-w-0 flex-1">
                                                 <button
                                                     onClick={(e) => toggleFavorite(e, repo.id)}
-                                                    className={`p-1 rounded-full transition-colors ${isFavorite ? 'text-yellow-400 hover:text-yellow-300' : 'text-slate-600 hover:text-yellow-500 hover:bg-yellow-500/10'}`}
+                                                    className={`p-1 rounded-md transition-colors 
+                                                        ${isFavorite ? 'text-yellow-400 hover:text-yellow-300' : 'text-yellow-100 hover:text-yellow-500 hover:bg-yellow-500/10'}`}
                                                     title={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                                                 >
                                                     <Star size={16} fill={isFavorite ? "currentColor" : "none"} />
                                                 </button>
                                                 <div className="min-w-0">
-                                                    <div className={`text-sm font-medium truncate ${isSelected ? 'text-blue-300' : 'text-slate-300'}`}>{repo.name}</div>
-                                                    <div className="text-[10px] text-slate-500 truncate">{repo.project.name}</div>
+                                                    <div className={`text-sm font-medium truncate ${isSelected ? 'text-orange-600' : 'text-yellow-50'}`}>{repo.name}</div>
+                                                    <div className="text-[10px]  text-yellow-50/70 truncate">{repo.project.name}</div>
                                                 </div>
                                             </div>
-                                            {isSelected && <Check size={16} className="text-blue-500 flex-shrink-0 ml-2" />}
+                                            {isSelected && <Check size={16} className="text-orange-600 flex-shrink-0 ml-2" />}
                                         </div>
                                     );
                                 })}
                                 {filteredRepos.length === 0 && (
-                                    <div className="p-4 text-center text-xs text-slate-500">Nenhum repositório encontrado.</div>
+                                    <div className="p-4 text-center text-xs text-gray-500">Nenhum repositório encontrado.</div>
                                 )}
                             </div>
                         </div>

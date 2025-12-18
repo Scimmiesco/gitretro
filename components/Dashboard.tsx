@@ -53,87 +53,77 @@ const Dashboard: React.FC<DashboardProps> = ({ username, dateRange, stats, onRes
   const activeRepos = selectedRepos?.map(repo => repo.name) ?? [];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-8 animate-in fade-in duration-500 rounded-md">
+    <div className="min-h-screen text-yellow-50 bg-emerald-950 border-2 border-emerald-900 p-4 animate-in fade-in duration-500 rounded-md">
 
       {/* Header & Global Metrics */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-              Olá, <span className="text-blue-500">{displayIdentity.split(/[, ]/)[0]}</span>
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-50 to-yellow-400">
+              Olá, <span className="text-yellow-600">{displayIdentity.split(/[, ]/)[0]}</span>
             </h1>
-            <p className="text-slate-400 mt-1">
+            <p className="text-yellow-100/70">
               Análise de impacto em:
             </p>
             <ul className="list-disc list-inside">
               {activeRepos.map((repo, index) => (
-                <li className="text-slate-200" key={index}>{repo}</li>
+                <li className="text-yellow-50" key={index}>{repo}</li>
               ))}
             </ul>
           </div>
           <button
             onClick={onReset}
-            className="self-start md:self-auto flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-lg hover:bg-slate-800 transition-colors"
+            className="self-start md:self-auto flex items-center gap-2 px-4 py-2 text-sm text-yellow-50 hover:text-yellow-100 border-2 border-yellow-50 rounded-md hover:bg-emerald-900 hover:text-yellow-100 transition-colors"
           >
-            <ArrowLeft size={16} /> Voltar
+            <ArrowLeft className="text-yellow-100" size={16} /> Voltar
           </button>
         </div>
 
         {/* Top KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Total Commits */}
-          <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-lg relative overflow-hidden group hover:border-blue-500/30 transition-colors">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                <GitBranch size={20} />
+          {[
+            {
+              label: 'Total de Commits',
+              value: totalCommits,
+              footer: 'no período selecionado',
+              icon: GitBranch
+            },
+            {
+              label: 'Foco Principal',
+              value: getCategoryLabel(mostFrequentCategory),
+              footer: 'maioria das entregas',
+              icon: Zap
+            },
+            {
+              label: 'Repositórios',
+              value: activeRepos.length,
+              footer: 'projetos ativos',
+              icon: FolderGit2
+            },
+            {
+              label: 'Período',
+              value: dateRange.label,
+              footer: `${dateRange.start.toLocaleDateString()} - ${dateRange.end.toLocaleDateString()}`,
+              icon: CalendarCheck
+            },
+          ].map((item, index) => (
+            <div
+              key={index}
+              className="flex flex-col justify-around bg-emerald-950 p-2 rounded-xl border-2 border-yellow-50 relative overflow-hidden group hover:border-yellow-100 transition-colors"
+            >
+              <div className="absolute top-0 right-0 w-64 h-24 bg-emerald-400/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+              <div className="flex justify-start items-center text-center gap-1">
+                <div className="p-2 text-yellow-600 group-hover:text-yellow-100 group-hover:bg-orange-600/20 rounded-md transition-colors">
+                  <item.icon size={24} />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-wider text-yellow-50">{item.label}</span>
               </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Total de Commits</span>
-            </div>
-            <div className="text-3xl font-bold text-white">{totalCommits}</div>
-            <div className="text-xs text-slate-500 mt-1">no período selecionado</div>
-          </div>
-
-          {/* Top Type */}
-          <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-lg relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                <Zap size={20} />
+              <div className="text-3xl font-bold text-yellow-100 truncate px-2" title={item.value.toString()}>
+                {item.value}
               </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Foco Principal</span>
+              <div className="text-xs text-yellow-100/70 px-2">{item.footer}</div>
             </div>
-            <div className="text-2xl font-bold text-white truncate" title={getCategoryLabel(mostFrequentCategory)}>
-              {getCategoryLabel(mostFrequentCategory)}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">maioria das entregas</div>
-          </div>
-
-          {/* Repos Active */}
-          <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-lg relative overflow-hidden group hover:border-purple-500/30 transition-colors">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-colors">
-                <FolderGit2 size={20} />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Repositórios</span>
-            </div>
-            <div className="text-3xl font-bold text-white">{activeRepos.length}</div>
-            <div className="text-xs text-slate-500 mt-1">projetos ativos</div>
-          </div>
-
-          {/* Year/Time */}
-          <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-lg relative overflow-hidden group hover:border-orange-500/30 transition-colors">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-orange-500/10 rounded-lg text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                <CalendarCheck size={20} />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Período</span>
-            </div>
-            <div className="text-3xl font-bold text-white">{dateRange.label}</div>
-            <div className="text-xs text-slate-500 mt-1">{dateRange.start.toLocaleDateString()} - {dateRange.end.toLocaleDateString()}</div>
-          </div>
+          ))}
         </div>
       </div>
 
@@ -141,25 +131,21 @@ const Dashboard: React.FC<DashboardProps> = ({ username, dateRange, stats, onRes
       <div className="max-w-7xl mx-auto">
 
         {/* Tabs Navigation */}
-        <div className="flex gap-2 mb-6 border-b border-slate-800">
-          <button
-            onClick={() => setActiveTab('taskGenerate')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'taskGenerate' ? 'border-emerald-500 text-emerald-400 bg-slate-900/50 rounded-t-lg' : 'border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/30 rounded-t-lg'}`}
-          >
-            <TicketPlus size={18} /> Gerador de Tarefas
-          </button>
-          <button
-            onClick={() => setActiveTab('timeline')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'timeline' ? 'border-blue-500 text-blue-400 bg-slate-900/50 rounded-t-lg' : 'border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/30 rounded-t-lg'}`}
-          >
-            <LayoutList size={18} /> Timeline de Commits
-          </button>
-          <button
-            onClick={() => setActiveTab('assistant')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'assistant' ? 'border-orange-500 text-orange-400 bg-slate-900/50 rounded-t-lg' : 'border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/30 rounded-t-lg'}`}
-          >
-            <BrainCircuit size={18} /> Assistente de Discurso
-          </button>
+        <div className="flex justify-center gap-2 p-2">
+          {[
+            { id: 'taskGenerate', label: 'Gerador de Tarefas', icon: TicketPlus },
+            { id: 'timeline', label: 'Timeline de Commits', icon: LayoutList },
+            { id: 'assistant', label: 'Assistente de Discurso', icon: BrainCircuit },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex flex-1 text-center justify-center items-center gap-2 px-6 py-3 text-sm font-bold border-b-2 transition-all 
+                ${activeTab === tab.id ? `border-orange-600 text-yellow-500 ` : 'border-transparent text-yellow-100/70 hover:text-yellow-100'}`}
+            >
+              <tab.icon size={18} /> {tab.label}
+            </button>
+          ))}
         </div>
 
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">

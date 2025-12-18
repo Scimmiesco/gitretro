@@ -212,7 +212,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start p-2 bg-slate-900 font-inter">
+    <div className="min-h-screen flex flex-col items-center justify-start p-2 bg-gray-950 font-inter">
       {error && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-red-50 text-red-600 px-6 py-4 rounded-lg shadow-lg border border-red-100 flex items-center w-full max-w-lg">
           <span className="font-semibold mr-2 shrink-0">Erro:</span>
@@ -224,7 +224,6 @@ const App: React.FC = () => {
       {!isConnected ? (
         <div className="w-full max-w-md space-y-4 m-auto">
           <InputForm onSubmit={handleFetch} loading={loading} />
-          <p className="text-center text-slate-500 text-xs">Conecte-se para iniciar a análise.</p>
         </div>
       ) : (
         <div className="w-full max-w-6xl">
@@ -233,14 +232,16 @@ const App: React.FC = () => {
             <div className="flex justify-between items-center">
               <button
                 onClick={handleReset}
-                className="p-2 flex items-center gap-2 text-slate-300 hover:text-slate-100 transition-colors font-bold text-xs rounded-lg hover:bg-slate-700"
+                className="p-2 flex items-center gap-2 text-yellow-50 hover:text-yellow-100 
+                transition-colors font-bold text-xs rounded-md hover:bg-emerald-950"
               >
                 &larr; Nova Conexão
               </button>
             </div>
 
             {/* GLOBAL CONFIGURATION BAR: Date & Repo Context */}
-            <div className="border border-slate-800 rounded-xl p-4 mb-6 flex flex-col md:flex-row gap-6 items-start md:items-center shadow-lg animate-in slide-in-from-top-4">
+            <div className="border-2 bg-emerald-950 border-emerald-900 rounded-md p-2 flex flex-col 
+            md:flex-row gap-4 items-start md:items-center animate-in slide-in-from-top-4">
               <div className="flex-1">
                 <DateRangeSelector currentRange={dateRange} onRangeChange={handleDateChange} disabled={loading} />
               </div>
@@ -248,15 +249,16 @@ const App: React.FC = () => {
               {/* Information / Status */}
               {currentProvider === 'azure' && (
                 <div className="text-right hidden md:block">
-                  <div className="text-xs text-slate-500 font-bold uppercase">Organização</div>
-                  <div className="text-sm font-bold text-blue-400">{azureConfig?.org}</div>
+                  <div className="text-xs text-yellow-50 font-bold uppercase">Organização</div>
+                  <div className="text-md font-bold text-yellow-500">{azureConfig?.org}</div>
                 </div>
               )}
             </div>
 
             {/* Repository Selector for Azure */}
             {currentProvider === 'azure' && (
-              <div className="animate-in fade-in slide-in-from-bottom-4">
+              <div className="border-2 bg-emerald-950 border-emerald-900 rounded-md p-2 flex flex-col 
+            md:flex-row gap-4 items-start md:items-center animate-in slide-in-from-top-4">
                 <RepositorySelector
                   repositories={availableRepos}
                   selectedRepoIds={selectedRepoIds}
@@ -286,12 +288,12 @@ const App: React.FC = () => {
 
           {/* Empty State / Welcome for Dashboard when connected but no stats yet */}
           {!stats && currentProvider === 'azure' && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center mt-8 animate-fade-in">
-              <div className="w-20 h-20 bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-500">
+            <div className="bg-emerald-950 border-2 border-emerald-900 rounded-md p-4 text-center animate-fade-in">
+              <div className="w-20 h-20 flex items-center justify-center mx-auto text-orange-600">
                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Conectado à {azureConfig?.org}</h2>
-              <p className="text-slate-400 max-w-md mx-auto">
+              <h2 className="text-2xl font-bold text-yellow-50 mb-2">Conectado à {azureConfig?.org}</h2>
+              <p className="text-yellow-100/70 text-pretty max-w-full mx-auto">
                 Selecione os repositórios acima e defina o período de análise.
               </p>
             </div>

@@ -53,7 +53,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({ currentRan
 
     return (
         <div className="w-full bg-transparent flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+            <div className="flex items-center gap-2 text-yellow-50 text-xs font-bold uppercase tracking-wider">
                 <Calendar size={14} /> Período de Análise
             </div>
 
@@ -63,9 +63,10 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({ currentRan
                         key={preset.label}
                         disabled={disabled}
                         onClick={() => handlePreset(preset.days, preset.label)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${!isCustom && currentRange.label === preset.label
-                            ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20'
-                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                        className={`px-3 py-2 rounded-full text-xs font-bold transition-all border-2
+                             ${!isCustom && currentRange.label === preset.label
+                                ? 'bg-orange-600 border-orange-800 text-yellow-50'
+                                : 'border-yellow-50 text-yellow-50 hover:border-orange-800 hover:text-yellow-100'
                             }`}
                     >
                         {preset.label}
@@ -74,9 +75,10 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({ currentRan
                 <button
                     disabled={disabled}
                     onClick={() => setIsCustom(true)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${isCustom
-                        ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                    className={`px-3 py-2 rounded-full text-xs font-bold transition-all border-2
+                         ${isCustom
+                            ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20'
+                            : 'border-yellow-50 text-yellow-50 hover:border-orange-800 hover:text-yellow-100'
                         }`}
                 >
                     Personalizado
@@ -87,15 +89,15 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({ currentRan
                 <div className="flex items-center gap-2 animate-in slide-in-from-left-2 duration-200">
                     <input
                         type="date"
-                        className="bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-xs text-white color-scheme-dark"
+                        className="bg-gray950 border border-gray800 rounded px-2 py-1.5 text-xs text-white color-scheme-dark"
                         value={customStart}
                         onChange={e => setCustomStart(e.target.value)}
                         disabled={disabled}
                     />
-                    <span className="text-slate-600">-</span>
+                    <span className="text-gray600">-</span>
                     <input
                         type="date"
-                        className="bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-xs text-white color-scheme-dark"
+                        className="bg-gray950 border border-gray800 rounded px-2 py-1.5 text-xs text-white color-scheme-dark"
                         value={customEnd}
                         onChange={e => setCustomEnd(e.target.value)}
                         disabled={disabled}
@@ -103,7 +105,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({ currentRan
                     <button
                         onClick={handleCustomSubmit}
                         disabled={disabled}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-bold ml-2"
+                        className="px-3 py-1.5 bg-gray800 hover:bg-gray700 text-white rounded text-xs font-bold ml-2"
                     >
                         Aplicar
                     </button>
