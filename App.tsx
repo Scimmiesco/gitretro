@@ -240,7 +240,7 @@ const App: React.FC = () => {
             </div>
 
             {/* GLOBAL CONFIGURATION BAR: Date & Repo Context */}
-            <div className="border-2 bg-emerald-950 border-emerald-900 rounded-md p-2 flex flex-col 
+            <div className="border-2 bg-surface-muted border-primary-dark rounded-md p-2 flex flex-col 
             md:flex-row gap-4 items-start md:items-center animate-in slide-in-from-top-4">
               <div className="flex-1">
                 <DateRangeSelector currentRange={dateRange} onRangeChange={handleDateChange} disabled={loading} />
@@ -257,7 +257,7 @@ const App: React.FC = () => {
 
             {/* Repository Selector for Azure */}
             {currentProvider === 'azure' && (
-              <div className="border-2 bg-emerald-950 border-emerald-900 rounded-md p-2 flex flex-col 
+              <div className="border-2 bg-surface-muted border-primary-dark rounded-md p-2 flex flex-col 
             md:flex-row gap-4 items-start md:items-center animate-in slide-in-from-top-4">
                 <RepositorySelector
                   repositories={availableRepos}

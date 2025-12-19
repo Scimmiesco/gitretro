@@ -83,7 +83,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
                 {/* Header / Trigger */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="p-1 rounded-md text-orange-700">
+                    <div className="p-1 rounded-md text-accent">
                         <FolderGit2 size={24} />
                     </div>
                     <div>
@@ -110,8 +110,8 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                         onClick={onConfirm}
                         disabled={isLoading || selectedRepoIds.length === 0}
                         className="
-                        bg-gradient-to-r from-yellow-700 to-yellow-800 hover:from-yellow-600 hover:to-orange-600
-                        px-6 py-2 text-yellow-50 font-bold rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                        bg-accent text-surface font-bold
+                        px-6 py-2  font-bold rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                     >
                         {isLoading ? 'Carregando...' : 'Analisar'}
                     </button>
