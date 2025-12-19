@@ -151,6 +151,7 @@ const Dashboard: React.FC<DashboardProps> = ({ username, dateRange, stats, onRes
               stats={stats}
               username={username}
               provider={provider}
+              token={token}
               userContext={userContext}
               setUserContext={setUserContext}
             />

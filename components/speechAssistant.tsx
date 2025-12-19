@@ -3,18 +3,20 @@ import React, { useMemo, useState } from "react";
 import { ContextSelector } from "./ContextSelector";
 import { CategorizedCommit, CategoryType, Provider, UserContext, YearStats } from "@/types";
 import { buildPrompt } from "@/utils/ai-prompts";
-import { GoogleGenAI } from "@google/genai";
+import { generateSpeechWithAI } from "@/services/speech";
+import { fetchAzureCommitDiff, fetchGitHubCommitDiff } from "@/services/taskGenerator";
 
 interface SpeechAssistantProps {
     username: string;
     stats: YearStats;
     provider: Provider;
+    token?: string; // Added token prop
     userContext: UserContext;
     setUserContext: (ctx: UserContext) => void;
 }
 
 type ViewMode = 'daily' | 'sprint' | 'semester' | 'year';
-export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, setUserContext, provider, stats, username }) => {
+export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, setUserContext, provider, token, stats, username }) => {
     const [aiSummary, setAiSummary] = useState<string | null>(null);
     const [generatingAi, setGeneratingAi] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -54,52 +56,64 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
     }, [viewMode, stats.categorizedCommits]);
 
     const generateAiSummary = async () => {
-        if (!process.env.API_KEY) {
-            alert("API Key não encontrada.");
-            return;
-        }
-
         setGeneratingAi(true);
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
             // Group commits for the prompt
             const promptGroups: Record<string, CategorizedCommit[]> = {};
-            aiContextCommits.forEach(c => {
-                if (!promptGroups[c.repo]) promptGroups[c.repo] = [];
-                promptGroups[c.repo].push(c);
-            });
 
-            const currentStats = {
-                [CategoryType.FEATURE]: aiContextCommits.filter(c => c.category === CategoryType.FEATURE).length,
-                [CategoryType.FIX]: aiContextCommits.filter(c => c.category === CategoryType.FIX).length,
-                [CategoryType.REFACTOR]: aiContextCommits.filter(c => c.category === CategoryType.REFACTOR).length,
-                [CategoryType.MAINTENANCE]: aiContextCommits.filter(c => c.category === CategoryType.MAINTENANCE).length,
+            // Enrich commits with details
+            const enrichedCommits: CategorizedCommit[] = [];
+
+            // Helper to process commits in chunks to avoid rate limits
+            const processCommit = async (c: CategorizedCommit) => {
+                let details = c.body || "";
+                try {
+                    // Use prop token
+                    if (c.url.includes("azure") && token) {
+                        const data = await fetchAzureCommitDiff(c.url, c.sha, token);
+                        details = `[Full Message]: ${data.description}\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
+                    } else if (c.url.includes("github")) {
+                        const data = await fetchGitHubCommitDiff(c.repo, c.sha, token);
+                        details = `[Full Message]: ${data.description}\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
+                    }
+                } catch (err) {
+                    console.warn(`Failed to fetch details for ${c.sha}`, err);
+                }
+
+                return { ...c, body: details };
             };
+
+            // Process all selected context commits
+            for (const c of aiContextCommits) {
+                const enriched = await processCommit(c);
+                enrichedCommits.push(enriched);
+
+                // Grouping logic remains the same but uses enriched data
+                if (!promptGroups[enriched.repo]) {
+                    promptGroups[enriched.repo] = [];
+                }
+                promptGroups[enriched.repo].push(enriched);
+            }
 
             const prompt = buildPrompt(
                 userContext,
                 viewMode,
                 username,
-                aiContextCommits,
-                currentStats,
+                enrichedCommits,
+                stats.byCategory,
                 promptGroups
             );
 
             console.log('🤖 [AI] Prompt Gerado:', prompt);
 
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.0-flash-exp', // Or 'gemini-1.5-flash'
-                contents: prompt,
-            });
+            const response = await generateSpeechWithAI(prompt);
 
-            console.log('🤖 [AI] Resposta Bruta:', response);
-            // Fix: response.text is a getter in some versions or mapped that way in our environment
-            const text = typeof response.text === 'function' ? response.text : response.text;
-            setAiSummary(text);
-        } catch (e) {
+            console.log('🤖 [AI] Resposta DeepSeek:', response);
+            setAiSummary(response.content);
+
+        } catch (e: any) {
             console.error(e);
-            setAiSummary("Erro ao gerar resumo. Verifique a console para detalhes.");
+            setAiSummary(`Erro ao gerar resumo: ${e.message}`);
         } finally {
             setGeneratingAi(false);
         }
@@ -265,7 +279,7 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({ userContext, s
 
                             <div className="mt-8 pt-6 border-t border-gray800">
                                 <p className="text-xs text-yellow-100/70 italic text-center">
-                                    Gerado por IA (Gemini 2.0 Flash) • Revisão recomendada antes de falar.
+                                    Gerado por IA (DeepSeek Reasoner) • Revisão recomendada antes de falar.
                                 </p>
                             </div>
                         </div>
