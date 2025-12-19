@@ -633,11 +633,15 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                           (!selectedCommitId && recentCommits.length === 0)
                         }
                       >
-                        Atualizar commits
                         {loading ? (
-                          <Loader2 size={16} className="animate-spin" />
+                          <div className="flex gap-2 min-w-fit flex-nowrap text-center items-center">
+                            Atualizando commits
+                            <Loader2 size={16} className="animate-spin" />
+                          </div>
                         ) : (
-                          <RefreshCcw size={16} />
+                          <div className="flex gap-2 min-w-fit flex-nowrap text-center items-center">
+                            Atualizar commits <RefreshCcw size={16} />
+                          </div>
                         )}
                       </button>
                     </div>
