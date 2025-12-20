@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #10b981;
-  --color-primary-hover: #059669;
-  --color-primary-dark: #064e3b;
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-dark: var(--primary-dark);
 
-  --color-accent: #eab308;
-  --color-accent-hover: #ca8a04;
-  --color-accent-light: #fefce8;
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
 
-  --color-surface: #030712;
-  --color-surface-muted: #064e3b;
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
 
-  --font-inter: "Inter", sans-serif;
+  --font-inter: var(--font-inter);
 }
 
 /* Manual definitions to satisfy linter and for direct property usage */
@@ -21,8 +21,11 @@
   --primary-hover: #059669;
   --primary-dark: #002c20;
   --accent-light: #fefce8;
+  --accent: #eab308;
+  --accent-hover: #ca8a04;
   --surface: #011310;
-  --surface-muted: #001b14;
+  --surface-muted: #17382f33;
+  --font-inter: "Inter", sans-serif;
 }
 
 .bg-surface {
@@ -80,11 +83,9 @@
 
   .input-field {
     @apply w-full rounded-lg px-4 py-3 outline-none transition-all;
-    background-color: rgba(6, 78, 59, 0.5);
-    /* emerald-900/50 fallback */
+    background-color: var(--surface-muted);
     border-width: 2px;
-    border-color: #065f46;
-    /* emerald-800 fallback */
+    border-color: var(--primary-dark);
     color: var(--accent-light);
   }
 
@@ -100,15 +101,17 @@ option {
 select,
 input,
 textarea {
-  @apply bg-surface flex-1 border-2 border-accent/40  rounded-md p-2 text-xs text-accent-light focus:border-accent outline-none;
+  @apply bg-surface flex-1 border-2 border-accent/40 rounded-md p-2 text-xs text-accent-light focus:border-accent outline-none;
 }
 
 .container-destacado {
   @apply bg-transparent p-2 rounded-md border-2 border-accent-light relative overflow-hidden hover:border-white transition-colors;
 }
 
-.botao-primario{
-  @apply bg-accent text-surface 
-  px-6 py-2  font-bold rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2
-                   
+.container-padrao {
+  @apply border-2 bg-surface-muted border-primary-dark rounded-md p-2 flex flex-col md:flex-row gap-4 items-start md:items-center
+}
+
+.botao-primario {
+  @apply bg-accent text-surface px-6 py-2 font-bold rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2
 }

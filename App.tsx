@@ -8,6 +8,8 @@ import { fetchAzureCommits, discoverRepositories, fetchCommitsForRepos } from '.
 import { parseCommits, analyzeCommits } from './utils/analyzer';
 import { RepositorySelector } from './components/RepositorySelector';
 import { DateRangeSelector, DateRange } from './components/DateRangeSelector';
+import ThemeSelector from './components/ThemeSelector';
+import { Folder } from 'lucide-react';
 
 const App: React.FC = () => {
   const [stats, setStats] = useState<YearStats | null>(null);
@@ -237,6 +239,7 @@ const App: React.FC = () => {
               >
                 &larr; Nova Conexão
               </button>
+              <ThemeSelector />
             </div>
 
             {/* GLOBAL CONFIGURATION BAR: Date & Repo Context */}
@@ -249,8 +252,8 @@ const App: React.FC = () => {
               {/* Information / Status */}
               {currentProvider === 'azure' && (
                 <div className="text-right hidden md:block">
-                  <div className="text-xs text-yellow-50 font-bold uppercase">Organização</div>
-                  <div className="text-md font-bold text-yellow-500">{azureConfig?.org}</div>
+                  <div className="text-xs text-accent-light font-bold uppercase">Organização</div>
+                  <div className="text-md font-bold text-accent">{azureConfig?.org}</div>
                 </div>
               )}
             </div>
@@ -288,12 +291,12 @@ const App: React.FC = () => {
 
           {/* Empty State / Welcome for Dashboard when connected but no stats yet */}
           {!stats && currentProvider === 'azure' && (
-            <div className="bg-emerald-950 border-2 border-emerald-900 rounded-md p-4 text-center animate-fade-in">
-              <div className="w-20 h-20 flex items-center justify-center mx-auto text-orange-600">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            <div className="container-padrao flex !flex-col">
+              <div className="flex items-center justify-center mx-auto text-accent">
+                <Folder size={40} />
               </div>
-              <h2 className="text-2xl font-bold text-yellow-50 mb-2">Conectado à {azureConfig?.org}</h2>
-              <p className="text-yellow-100/70 text-pretty max-w-full mx-auto">
+              <h2 className="text-2xl font-bold text-accent-light">Conectado à {azureConfig?.org}</h2>
+              <p className="text-accent-light text-pretty max-w-full mx-auto">
                 Selecione os repositórios acima e defina o período de análise.
               </p>
             </div>

@@ -118,9 +118,8 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
             </span>
             <ChevronDown
               size={16}
-              className={`transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
           <button
@@ -136,9 +135,9 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
 
           {/* Dropdown Panel */}
           {isOpen && (
-            <div className="absolute top-full right-0 mt-2 w-full md:w-[400px] max-h-[60vh] bg-emerald-950 border-2 border-emerald-900 rounded-md flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
+            <div className="absolute top-full right-0 mt-2 w-full md:w-[400px] max-h-[60vh] bg-surface border-2 border-surface-muted rounded-md flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
               {/* Search */}
-              <div className="p-3 border-b border-emerald-900 bg-emerald-900/50">
+              <div className="p-3 border-b border-surface bg-surface-muted">
                 <div className="relative">
                   <Search
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-100"
@@ -147,7 +146,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                   <input
                     type="text"
                     placeholder="Filtrar repositórios..."
-                    className="placeholder:text-yellow-100/70 w-full bg-gray-950 border border-yellow-50 rounded-md pl-9 pr-3 py-2 text-xs text-yellow-50 focus:outline-none focus:border-orange-700"
+                    className="w-full !pl-10"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     autoFocus
@@ -183,21 +182,19 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                       onClick={() => toggleRepo(repo.id)}
                       className={`
                                                 flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors group border-2 border-transparent
-                                                 ${
-                                                   isSelected
-                                                     ? "bg-orange-800/20 border-2 border-orange-700/70"
-                                                     : "hover:bg-gray-950 hover:border-2 hover:border-yellow-100"
-                                                 }`}
+                                                 ${isSelected
+                          ? "bg-orange-800/20 border-2 border-orange-700/70"
+                          : "hover:bg-gray-950 hover:border-2 hover:border-yellow-100"
+                        }`}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <button
                           onClick={(e) => toggleFavorite(e, repo.id)}
                           className={`p-1 rounded-md transition-colors 
-                                                        ${
-                                                          isFavorite
-                                                            ? "text-yellow-400 hover:text-yellow-300"
-                                                            : "text-yellow-100 hover:text-yellow-500 hover:bg-yellow-500/10"
-                                                        }`}
+                                                        ${isFavorite
+                              ? "text-yellow-400 hover:text-yellow-300"
+                              : "text-yellow-100 hover:text-yellow-500 hover:bg-yellow-500/10"
+                            }`}
                           title={
                             isFavorite
                               ? "Remover dos favoritos"
@@ -211,9 +208,8 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                         </button>
                         <div className="min-w-0">
                           <div
-                            className={`text-sm font-medium truncate ${
-                              isSelected ? "text-orange-600" : "text-yellow-50"
-                            }`}
+                            className={`text-sm font-medium truncate ${isSelected ? "text-orange-600" : "text-yellow-50"
+                              }`}
                           >
                             {repo.name}
                           </div>

@@ -64,7 +64,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
           onClick={() => setProvider('azure')}
           className={`
             flex-1 py-2.5 text-sm font-semibold rounded-md transition-all
-            ${provider === 'azure' ? 'bg-gradient-to-r from-yellow-700 to-yellow-800' : ''} text-yellow-50 hover:brightness-125 hover:backdrop-brightness-125`}
+            ${provider === 'azure' ? 'bg-gradient-to-r from-primary to-primary-dark' : ''} text-accent-light hover:brightness-125 hover:backdrop-brightness-125`}
         >
           Azure DevOps
         </button>
@@ -72,8 +72,8 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
           type="button"
           onClick={() => setProvider('github')}
           disabled={true}
-          className={`${provider === 'github' ? 'bg-yellow-800' : ''} cursor-not-allowed flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all
-             text-yellow-50 hover:brightness-125 hover:backdrop-brightness-125`}
+          className={`${provider === 'github' ? 'bg-primary-dark' : ''} cursor-not-allowed flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all
+             text-accent-light hover:brightness-125 hover:backdrop-brightness-125`}
         >
           GitHub
         </button>
@@ -83,47 +83,47 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
 
         {provider === 'github' ? (
           <div className="space-y-2">
-            <label htmlFor="primary" className="text-xs font-bold uppercase tracking-wider text-yellow-50 ml-1">
+            <label htmlFor="primary" className="text-xs font-bold uppercase tracking-wider text-accent-light ml-1">
               Usuário do GitHub
             </label>
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-yellow-50 group-focus-within:text-yellow-500 transition-colors" size={20} />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-accent-light group-focus-within:text-accent transition-colors" size={20} />
               <input
                 id="primary"
                 type="text"
                 value={primaryInput}
                 onChange={(e) => setPrimaryInput(e.target.value)}
                 placeholder="ex: torvalds"
-                className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-yellow-100/70"
+                className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-accent-light rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all placeholder-accent-light/70"
               />
             </div>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="space-y-1">
-              <label htmlFor="orgName" className="text-xs font-bold uppercase tracking-wider text-yellow-50 ml-1">
+              <label htmlFor="orgName" className="text-xs font-bold uppercase tracking-wider text-accent-light ml-1">
                 Nome da Organização (Azure DevOps)
               </label>
               <div className="relative group">
-                <Cloud className="absolute left-4 top-1/2 transform -translate-y-1/2 text-yellow-50 group-focus-within:text-yellow-500 transition-colors" size={20} />
+                <Cloud className="absolute left-4 top-1/2 transform -translate-y-1/2 text-accent-light group-focus-within:text-accent transition-colors" size={20} />
                 <input
                   id="orgName"
                   type="text"
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder="Ex: InfortechMS"
-                  className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-yellow-100/70"
+                  className="w-full !pl-10"
                 />
               </div>
-              <p className="text-xs text-pretty text-yellow-50/75">O sistema irá buscar o trabalho em <strong className='text-yellow-50'>todos</strong> os projetos e repositórios desta organização.</p>
+              <p className="text-xs text-pretty text-accent-light/75">O sistema irá buscar o trabalho em <strong className='text-accent-light'>todos</strong> os projetos e repositórios desta organização.</p>
             </div>
 
             <div className="space-y-2 animate-fade-in">
-              <label htmlFor="secondary" className="text-xs font-bold uppercase tracking-wider text-yellow-50 ml-1">
+              <label htmlFor="secondary" className="text-xs font-bold uppercase tracking-wider text-accent-light ml-1">
                 Seus Nomes / E-mails (Separados por vírgula)
               </label>
               <div className="relative group">
-                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-yellow-50 group-focus-within:text-yellow-500 transition-colors" size={20} />
+                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-accent-light group-focus-within:text-accent transition-colors" size={20} />
                 <input
                   id="secondary"
                   type="text"
@@ -131,24 +131,24 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
                   onChange={(e) => setSecondaryInput(e.target.value)}
                   placeholder="Ex: Scimmiesco, pedro.almeida"
                   required
-                  className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all placeholder-yellow-100/70"
+                  className="w-full !pl-10"
                 />
               </div>
-              <p className="text-[10px] text-yellow-50/75 text-pretty">Use vírgulas se você comita com identidades diferentes (pessoal/corporativo).</p>
+              <p className="text-[10px] text-accent-light/75 text-pretty">Use vírgulas se você comita com identidades diferentes (pessoal/corporativo).</p>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label htmlFor="year" className="text-xs font-bold uppercase tracking-wider text-yellow-50 ml-1">Ano Base</label>
+            <label htmlFor="year" className="text-xs font-bold uppercase tracking-wider text-accent-light ml-1">Ano Base</label>
             <div className="relative group">
-              <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-yellow-50 group-focus-within:text-yellow-500 transition-colors" size={20} />
+              <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-accent-light group-focus-within:text-accent transition-colors" size={20} />
               <select
                 id="year"
                 value={year}
                 onChange={(e) => setYear(Number(e.target.value))}
-                className="w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-yellow-600 appearance-none bg-none"
+                className="w-full !pl-10"
               >
                 {Array.from({ length: 5 }).map((_, i) => (
                   <option key={i} value={currentYear - i} className="bg-gray-900">{currentYear - i}</option>
@@ -157,11 +157,11 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
             </div>
           </div>
           <div className="space-y-2">
-            <label htmlFor="token" className="text-xs font-bold uppercase tracking-wider text-yellow-50 ml-1">
-              Token <span className="text-yellow-600 font-normal">({provider === 'azure' ? 'Obrigatório' : 'Opcional'})</span>
+            <label htmlFor="token" className="text-xs font-bold uppercase tracking-wider text-accent-light ml-1">
+              Token <span className="text-accent uppercase font-bold text-xs font-mono">({provider === 'azure' ? 'Obrigatório' : 'Opcional'})</span>
             </label>
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-yellow-50 group-focus-within:text-yellow-500 transition-colors" size={20} />
+              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-accent-light group-focus-within:text-accent transition-colors" size={20} />
               <input
                 id="token"
                 type="password"
@@ -169,7 +169,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
                 onChange={(e) => setToken(e.target.value)}
                 required={provider === 'azure'}
                 placeholder={provider === 'github' ? "ghp_..." : "Personal Access Token"}
-                className={`w-full pl-12 pr-4 py-4 bg-gray-950 border border-gray-800 text-yellow-50 rounded-md focus:outline-none focus:ring-2 transition-all placeholder-yellow-100/70 ${provider === 'azure' ? 'focus:ring-yellow-600/50 focus:border-yellow-600' : 'focus:ring-gray-700 focus:border-yellow-100/70'}`}
+                className={`w-full !pl-10 ${provider === 'azure' ? 'focus:ring-accent/50 focus:border-accent' : 'focus:ring-gray-700 focus:border-accent-light/70'}`}
               />
             </div>
           </div>
@@ -179,15 +179,15 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
           type="submit"
           disabled={loading}
           className={`
-            w-full py-4 px-6 text-yellow-50
+            w-full py-4 px-6 text-accent-light
              font-bold rounded-md transition-all 
              active:scale-[0.98] flex justify-center items-center text-lg 
              ${loading ? 'opacity-70 cursor-not-allowed' : ''} 
-             ${provider === 'github' ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' : 'bg-gradient-to-r from-yellow-700 to-yellow-800 hover:from-yellow-600 hover:to-orange-600'}`}
+             ${provider === 'github' ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' : 'bg-gradient-to-r from-primary to-primary-dark hover:from-primary-hover hover:to-primary-dark'}`}
         >
           {loading ? (
             <span className="flex items-center">
-              <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5 text-yellow-50" />
+              <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5 text-accent-light" />
               Carregando...
             </span>
           ) : (
