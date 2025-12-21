@@ -53,7 +53,7 @@ const ThemeSelector: React.FC = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute top-12 right-0 bg-surface-muted backdrop-blur-md border-2 border-primary-dark p-4 rounded-lg shadow-xl w-64 z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="absolute top-12 right-0 bg-surface-muted backdrop-blur-md border-2 border-primary-dark p-4 rounded-lg shadow-xl w-64 z-[100] animate-in fade-in slide-in-from-top-2">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-sm font-bold text-accent-light">Tema</h3>
                         <button
