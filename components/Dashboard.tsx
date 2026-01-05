@@ -99,7 +99,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-accent-light to-accent">
               Olá,{" "}
-              <span className="text-yellow-600">
+              <span className="text-accent">
                 {displayIdentity.split(/[, ]/)[0]}
               </span>
             </h1>
@@ -140,7 +140,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               <div className="absolute top-0 right-0 w-64 h-24 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
               <div className="flex justify-start items-center text-center gap-1">
-                <div className="p-2 text-yellow-600 group-hover:text-white group-hover:bg-orange-600/20 rounded-md transition-colors">
+                <div className="p-2 text-accent group-hover:text-white group-hover:bg-orange-600/20 rounded-md transition-colors">
                   <item.icon size={24} />
                 </div>
                 <span className="text-xs font-bold uppercase tracking-wider text-accent-light">
@@ -182,10 +182,9 @@ const Dashboard: React.FC<DashboardProps> = ({
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex flex-1 text-center justify-center items-center gap-2 px-6 py-3 text-sm font-bold border-b-2 transition-all 
-                ${
-                  activeTab === tab.id
-                    ? `border-orange-600 text-yellow-500 `
-                    : "border-transparent text-yellow-100/70 hover:text-yellow-100"
+                ${activeTab === tab.id
+                  ? `border-orange-600 text-accent-light0 `
+                  : "border-transparent text-accent-light/70 hover:text-accent-light"
                 }`}
             >
               <tab.icon size={18} /> {tab.label}

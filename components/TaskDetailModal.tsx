@@ -30,10 +30,10 @@ export const TaskDetailModal = ({ task, onClose }: TaskDetailModalProps) => {
                 <div className="p-6 border-b border-gray800 flex justify-between items-start bg-gray950/50">
                     <div className="flex-1 min-w-0 pr-4">
                         <div className="flex items-center gap-3 mb-2">
-                            <span className="bg-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded shadow-lg shadow-yellow-500/20 uppercase tracking-wide">
+                            <span className="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded shadow-lg shadow-accent-light0/20 uppercase tracking-wide">
                                 {task.type} {task.id}
                             </span>
-                            <span className="text-yellow-100/70 text-sm flex items-center gap-1">
+                            <span className="text-accent-light/70 text-sm flex items-center gap-1">
                                 <Calendar size={14} />
                                 {task.sprint}
                             </span>
@@ -44,7 +44,7 @@ export const TaskDetailModal = ({ task, onClose }: TaskDetailModalProps) => {
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-yellow-100/70 hover:text-white hover:bg-gray800 p-2 rounded-lg transition-colors"
+                        className="text-accent-light/70 hover:text-white hover:bg-gray800 p-2 rounded-lg transition-colors"
                     >
                         <X size={20} />
                     </button>
@@ -55,15 +55,15 @@ export const TaskDetailModal = ({ task, onClose }: TaskDetailModalProps) => {
                     {/* Parent Context */}
                     {task.parent && (
                         <div className="bg-gray800/50 rounded-xl p-4 border border-gray700/50">
-                            <h3 className="text-xs font-bold text-yellow-100/70 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <h3 className="text-xs font-bold text-accent-light/70 uppercase tracking-wider mb-2 flex items-center gap-2">
                                 <Briefcase size={12} />
                                 Item Pai (Parent Context)
                             </h3>
                             <div className="flex items-center gap-2">
-                                <span className="text-xs font-mono text-yellow-100/70 bg-gray800 px-1 py-0.5 rounded border border-gray700">
+                                <span className="text-xs font-mono text-accent-light/70 bg-gray800 px-1 py-0.5 rounded border border-gray700">
                                     {task.parent.type} {task.parent.id}
                                 </span>
-                                <span className="text-yellow-50 font-medium truncate">
+                                <span className="text-accent-light font-medium truncate">
                                     {task.parent.title}
                                 </span>
                             </div>
@@ -72,20 +72,20 @@ export const TaskDetailModal = ({ task, onClose }: TaskDetailModalProps) => {
 
                     {/* Description */}
                     <div className="space-y-2">
-                        <h3 className="text-sm font-bold text-yellow-100/70 flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-accent-light/70 flex items-center gap-2">
                             Descrição
                         </h3>
                         <div
-                            className="text-yellow-50 text-sm leading-relaxed prose prose-invert max-w-none prose-sm bg-gray950/30 p-4 rounded-lg border border-gray800"
-                            dangerouslySetInnerHTML={{ __html: task.description || '<p class="text-yellow-100/70 italic">Sem descrição.</p>' }}
+                            className="text-accent-light text-sm leading-relaxed prose prose-invert max-w-none prose-sm bg-gray950/30 p-4 rounded-lg border border-gray800"
+                            dangerouslySetInnerHTML={{ __html: task.description || '<p class="text-accent-light/70 italic">Sem descrição.</p>' }}
                         />
                     </div>
 
                     {/* Metadata */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-gray950/50 p-3 rounded-lg border border-gray800">
-                            <span className="text-xs text-yellow-100/70 block mb-1">Criado por</span>
-                            <div className="flex items-center gap-2 text-yellow-50 text-sm">
+                            <span className="text-xs text-accent-light/70 block mb-1">Criado por</span>
+                            <div className="flex items-center gap-2 text-accent-light text-sm">
                                 <User size={14} />
                                 {task.createdBy}
                             </div>
@@ -94,10 +94,10 @@ export const TaskDetailModal = ({ task, onClose }: TaskDetailModalProps) => {
                             href={task.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-gray950/50 p-3 rounded-lg border border-gray800 hover:bg-gray800 hover:border-yellow-500/50 transition-all group"
+                            className="bg-gray950/50 p-3 rounded-lg border border-gray800 hover:bg-gray800 hover:border-accent-light0/50 transition-all group"
                         >
-                            <span className="text-xs text-yellow-100/70 block mb-1">Ver no Azure DevOps</span>
-                            <div className="flex items-center gap-2 text-yellow-400 text-sm group-hover:text-yellow-300">
+                            <span className="text-xs text-accent-light/70 block mb-1">Ver no Azure DevOps</span>
+                            <div className="flex items-center gap-2 text-accent text-sm group-hover:text-accent-light">
                                 <ExternalLink size={14} />
                                 Abrir Link Externo
                             </div>

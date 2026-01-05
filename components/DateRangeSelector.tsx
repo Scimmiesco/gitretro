@@ -68,11 +68,10 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
             disabled={disabled}
             onClick={() => handlePreset(preset.days, preset.label)}
             className={`p-2 rounded-full text-xs font-bold transition-all border-2 cursor-pointer
-                             ${
-                               !isCustom && currentRange.label === preset.label
-                                 ? "bg-accent border-accent-light text-surface font-extrabold"
-                                 : "border-accent-text-accent-light text-accent-light hover:border-accent hover:text-yellow-100"
-                             }`}
+                             ${!isCustom && currentRange.label === preset.label
+                ? "bg-accent border-accent-light text-surface font-extrabold"
+                : "border-accent-text-accent-light text-accent-light hover:border-accent hover:text-accent-light"
+              }`}
           >
             {preset.label}
           </button>
@@ -81,11 +80,10 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
           disabled={disabled}
           onClick={() => setIsCustom(true)}
           className={`px-3 py-2 rounded-full text-xs font-bold transition-all border-2
-                         ${
-                           isCustom
-                             ? "bg-accent border-accent-light text-accent-light font-extrabold"
-                             : "border-accent-text-accent-light text-accent-light hover:border-accent hover:text-yellow-100"
-                         }`}
+                         ${isCustom
+              ? "bg-accent border-accent-light text-accent-light font-extrabold"
+              : "border-accent-text-accent-light text-accent-light hover:border-accent hover:text-accent-light"
+            }`}
         >
           Personalizado
         </button>

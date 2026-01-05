@@ -234,7 +234,7 @@ const App: React.FC = () => {
             <div className="flex justify-between items-center">
               <button
                 onClick={handleReset}
-                className="p-2 flex items-center gap-2 text-yellow-50 hover:text-yellow-100 
+                className="p-2 flex items-center gap-2 text-accent-light hover:text-accent-light 
                 transition-colors font-bold text-xs rounded-md hover:bg-emerald-950"
               >
                 &larr; Nova Conexão

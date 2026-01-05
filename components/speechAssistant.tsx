@@ -98,14 +98,12 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
           // Use prop token
           if (c.url.includes("azure") && token) {
             const data = await fetchAzureCommitDiff(c.url, c.sha, token);
-            details = `[Full Message]: ${
-              data.description
-            }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
+            details = `[Full Message]: ${data.description
+              }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
           } else if (c.url.includes("github")) {
             const data = await fetchGitHubCommitDiff(c.repo, c.sha, token);
-            details = `[Full Message]: ${
-              data.description
-            }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
+            details = `[Full Message]: ${data.description
+              }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
           }
         } catch (err) {
           console.warn(`Failed to fetch details for ${c.sha}`, err);
@@ -166,11 +164,10 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
 
           <div className="space-y-2">
             <label
-              className={`container-destacado block p-2 rounded-md border cursor-pointer transition-all group ${
-                viewMode === "daily"
-                  ? "bg-yellow-600/10 border-yellow-500/50"
-                  : "bg-gray950/50 border-gray800 hover:border-gray600"
-              }`}
+              className={`container-destacado block p-2 rounded-md border cursor-pointer transition-all group ${viewMode === "daily"
+                ? "bg-accent/10 border-accent-light0/50"
+                : "bg-gray950/50 border-gray800 hover:border-gray600"
+                }`}
             >
               <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
 
@@ -183,32 +180,30 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                   onChange={() => setViewMode("daily")}
                 />
                 <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    viewMode === "daily"
-                      ? "border-yellow-500"
-                      : "border-gray600 group-hover:border-gray400"
-                  }`}
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "daily"
+                    ? "border-accent-light0"
+                    : "border-gray600 group-hover:border-gray400"
+                    }`}
                 >
                   {viewMode === "daily" && (
-                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div className="w-2 h-2 rounded-full bg-accent-light0"></div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 font-bold text-yellow-50">
+                <div className="flex items-center gap-2 font-bold text-accent-light">
                   <Coffee size={16} className="text-orange-500" /> Daily
                   Stand-up
                 </div>
               </div>
-              <p className="text-xs text-yellow-100/70 ml-7">
+              <p className="text-xs text-accent-light/70 ml-7">
                 Foco: Ontem vs Hoje. O que foi feito e impedimentos.
               </p>
             </label>
 
             <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${
-                viewMode === "sprint"
-                  ? "bg-purple-600/10 border-purple-500/50"
-                  : "bg-gray950/50 border-gray800 hover:border-gray600"
-              }`}
+              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "sprint"
+                ? "bg-purple-600/10 border-purple-500/50"
+                : "bg-gray950/50 border-gray800 hover:border-gray600"
+                }`}
             >
               <div className="flex items-center gap-3 mb-2">
                 <input
@@ -219,31 +214,29 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                   onChange={() => setViewMode("sprint")}
                 />
                 <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    viewMode === "sprint"
-                      ? "border-purple-500"
-                      : "border-gray600 group-hover:border-gray400"
-                  }`}
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "sprint"
+                    ? "border-purple-500"
+                    : "border-gray600 group-hover:border-gray400"
+                    }`}
                 >
                   {viewMode === "sprint" && (
                     <div className="w-2 h-2 rounded-full bg-purple-500"></div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 font-bold text-yellow-50">
-                  <Zap size={16} className="text-yellow-500" /> Review da Sprint
+                <div className="flex items-center gap-2 font-bold text-accent-light">
+                  <Zap size={16} className="text-accent-light0" /> Review da Sprint
                 </div>
               </div>
-              <p className="text-xs text-yellow-100/70 ml-7">
+              <p className="text-xs text-accent-light/70 ml-7">
                 Foco: Entregas de valor, funcionalidades e dematadas.
               </p>
             </label>
 
             <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${
-                viewMode === "semester"
-                  ? "bg-green-600/10 border-green-500/50"
-                  : "bg-gray950/50 border-gray800 hover:border-gray600"
-              }`}
+              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "semester"
+                ? "bg-green-600/10 border-green-500/50"
+                : "bg-gray950/50 border-gray800 hover:border-gray600"
+                }`}
             >
               <div className="flex items-center gap-3 mb-2">
                 <input
@@ -254,31 +247,29 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                   onChange={() => setViewMode("semester")}
                 />
                 <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    viewMode === "semester"
-                      ? "border-green-500"
-                      : "border-gray600 group-hover:border-gray400"
-                  }`}
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "semester"
+                    ? "border-green-500"
+                    : "border-gray600 group-hover:border-gray400"
+                    }`}
                 >
                   {viewMode === "semester" && (
                     <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 font-bold text-yellow-50">
+                <div className="flex items-center gap-2 font-bold text-accent-light">
                   <Users size={16} className="text-green-500" /> Feedback 1:1
                 </div>
               </div>
-              <p className="text-xs text-yellow-100/70 ml-7">
+              <p className="text-xs text-accent-light/70 ml-7">
                 Foco: Evolução semestral, projetos e colaboração.
               </p>
             </label>
 
             <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${
-                viewMode === "year"
-                  ? "bg-yellow-600/10 border-yellow-500/50"
-                  : "bg-gray950/50 border-gray800 hover:border-gray600"
-              }`}
+              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "year"
+                ? "bg-accent/10 border-accent-light0/50"
+                : "bg-gray950/50 border-gray800 hover:border-gray600"
+                }`}
             >
               <div className="flex items-center gap-3 mb-2">
                 <input
@@ -289,22 +280,21 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                   onChange={() => setViewMode("year")}
                 />
                 <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    viewMode === "year"
-                      ? "border-yellow-500"
-                      : "border-gray600 group-hover:border-gray400"
-                  }`}
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "year"
+                    ? "border-accent-light0"
+                    : "border-gray600 group-hover:border-gray400"
+                    }`}
                 >
                   {viewMode === "year" && (
-                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <div className="w-2 h-2 rounded-full bg-accent-light0"></div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 font-bold text-yellow-50">
-                  <CalendarCheck size={16} className="text-yellow-500" />{" "}
+                <div className="flex items-center gap-2 font-bold text-accent-light">
+                  <CalendarCheck size={16} className="text-accent-light0" />{" "}
                   Retrospectiva Anual
                 </div>
               </div>
-              <p className="text-xs text-yellow-100/70 ml-7">
+              <p className="text-xs text-accent-light/70 ml-7">
                 Foco: Visão holística do ano, constância e marcos.
               </p>
             </label>
@@ -320,11 +310,10 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
             <button
               onClick={generateAiSummary}
               disabled={generatingAi}
-              className={`w-full py-4 mt-4 rounded-xl font-bold shadow-lg transition-all transform active:scale-95 flex justify-center items-center gap-2 text-white ${
-                generatingAi
-                  ? "bg-gray800 cursor-not-allowed text-yellow-100/70"
-                  : "bg-gradient-to-r from-yellow-600 to-yellow-600 hover:from-yellow-500 hover:to-yellow-500 shadow-yellow-900/30"
-              }`}
+              className={`w-full py-4 mt-4 rounded-xl font-bold shadow-lg transition-all transform active:scale-95 flex justify-center items-center gap-2 text-white ${generatingAi
+                ? "bg-gray800 cursor-not-allowed text-accent-light/70"
+                : "bg-gradient-to-r from-accent to-accent hover:from-accent-light0 hover:to-accent-light0 shadow-accent/30"
+                }`}
             >
               {generatingAi ? (
                 <>
@@ -355,11 +344,10 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={copyToClipboard}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      copied
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-gray800 text-yellow-100/70 hover:bg-gray700 hover:text-white"
-                    }`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${copied
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-gray800 text-accent-light/70 hover:bg-gray700 hover:text-white"
+                      }`}
                   >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                     {copied ? "Copiado!" : "Copiar"}
@@ -367,18 +355,17 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                 </div>
               </div>
 
-              <div className="prose prose-invert max-w-none prose-p:text-yellow-50 prose-headings:text-white prose-strong:text-yellow-400 prose-ul:text-yellow-50">
+              <div className="prose prose-invert max-w-none prose-p:text-accent-light prose-headings:text-white prose-strong:text-accent prose-ul:text-accent-light">
                 {/* Split summary by lines and render delicately */}
                 {aiSummary.split("\n").map((line, i) => (
                   <p
                     key={i}
-                    className={`mb-2 leading-relaxed ${
-                      line.startsWith("#")
-                        ? "text-lg font-bold text-white mt-4"
-                        : line.startsWith("-")
+                    className={`mb-2 leading-relaxed ${line.startsWith("#")
+                      ? "text-lg font-bold text-white mt-4"
+                      : line.startsWith("-")
                         ? "ml-4"
                         : ""
-                    }`}
+                      }`}
                   >
                     {line.replaceAll("#", "").trim()}
                   </p>
@@ -386,18 +373,18 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
               </div>
 
               <div className="mt-8 pt-6 border-t border-gray800">
-                <p className="text-xs text-yellow-100/70 italic text-center">
+                <p className="text-xs text-accent-light/70 italic text-center">
                   Gerado por IA (DeepSeek Reasoner) • Revisão recomendada antes
                   de falar.
                 </p>
               </div>
             </div>
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-yellow-100/70 p-8 text-center opacity-60">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-accent-light/70 p-8 text-center opacity-60">
               <div className="w-24 h-24 bg-gray800 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                <BrainCircuit size={48} className="text-yellow-100/70" />
+                <BrainCircuit size={48} className="text-accent-light/70" />
               </div>
-              <h3 className="text-xl font-bold text-yellow-100/70 mb-2">
+              <h3 className="text-xl font-bold text-accent-light/70 mb-2">
                 Aguardando geração
               </h3>
               <p className="max-w-md">
