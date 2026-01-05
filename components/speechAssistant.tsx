@@ -34,6 +34,50 @@ interface SpeechAssistantProps {
 }
 
 type ViewMode = "daily" | "sprint" | "semester" | "year";
+
+const VIEW_MODES = [
+  {
+    id: "daily" as const,
+    label: "Daily Stand-up",
+    icon: Coffee,
+    description: "Foco: Ontem vs Hoje. O que foi feito e impedimentos.",
+    activeClass: "!bg-accent/10",
+    indicatorColor: "bg-accent",
+    borderColor: "border-accent",
+    iconColor: "text-accent",
+  },
+  {
+    id: "sprint" as const,
+    label: "Review da Sprint",
+    icon: Zap,
+    description: "Foco: Entregas de valor, funcionalidades e dematadas.",
+    activeClass: "!bg-purple-500/10",
+    indicatorColor: "bg-purple-500",
+    borderColor: "border-purple-500",
+    iconColor: "text-accent-light",
+
+  },
+  {
+    id: "semester" as const,
+    label: "Feedback 1:1",
+    icon: Users,
+    description: "Foco: Evolução semestral, projetos e colaboração.",
+    activeClass: "!bg-green-500/10",
+    indicatorColor: "bg-green-500",
+    borderColor: "border-green-500",
+    iconColor: "text-green-500",
+  },
+  {
+    id: "year" as const,
+    label: "Retrospectiva Anual",
+    icon: CalendarCheck,
+    description: "Foco: Visão holística do ano, constância e marcos.",
+    activeClass: "!bg-blue-600/10",
+    indicatorColor: "bg-accent-light",
+    borderColor: "border-accent-light",
+    iconColor: "text-accent-light",
+  },
+];
 export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
   userContext,
   setUserContext,
@@ -156,148 +200,54 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
         <ContextSelector context={userContext} onChange={setUserContext} />
 
         {/* AI Controls */}
-        <div className=" container-destacado">
+        <div className="container-destacado">
           <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
           <h3 className="flex items-center gap-2 font-bold text-accent-light p-2">
             <BrainCircuit className="text-accent" size="24" /> Gerar Discurso
           </h3>
 
           <div className="space-y-2">
-            <label
-              className={`container-destacado block p-2 rounded-md border cursor-pointer transition-all group ${viewMode === "daily"
-                ? "bg-accent/10 border-accent-light0/50"
-                : "bg-gray950/50 border-gray800 hover:border-gray600"
-                }`}
-            >
-              <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-
-              <div className="flex items-center gap-3 mb-2">
-                <input
-                  type="radio"
-                  name="aiMode"
-                  className="hidden"
-                  checked={viewMode === "daily"}
-                  onChange={() => setViewMode("daily")}
-                />
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "daily"
-                    ? "border-accent-light0"
-                    : "border-gray600 group-hover:border-gray400"
+            {VIEW_MODES.map((mode) => {
+              const isActive = viewMode === mode.id;
+              return (
+                <label
+                  key={mode.id}
+                  className={`container-destacado block cursor-pointer transition-all group ${isActive ? mode.activeClass : ""
                     }`}
                 >
-                  {viewMode === "daily" && (
-                    <div className="w-2 h-2 rounded-full bg-accent-light0"></div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-accent-light">
-                  <Coffee size={16} className="text-orange-500" /> Daily
-                  Stand-up
-                </div>
-              </div>
-              <p className="text-xs text-accent-light/70 ml-7">
-                Foco: Ontem vs Hoje. O que foi feito e impedimentos.
-              </p>
-            </label>
+                  <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
 
-            <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "sprint"
-                ? "bg-purple-600/10 border-purple-500/50"
-                : "bg-gray950/50 border-gray800 hover:border-gray600"
-                }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <input
-                  type="radio"
-                  name="aiMode"
-                  className="hidden"
-                  checked={viewMode === "sprint"}
-                  onChange={() => setViewMode("sprint")}
-                />
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "sprint"
-                    ? "border-purple-500"
-                    : "border-gray600 group-hover:border-gray400"
-                    }`}
-                >
-                  {viewMode === "sprint" && (
-                    <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-accent-light">
-                  <Zap size={16} className="text-accent-light0" /> Review da Sprint
-                </div>
-              </div>
-              <p className="text-xs text-accent-light/70 ml-7">
-                Foco: Entregas de valor, funcionalidades e dematadas.
-              </p>
-            </label>
-
-            <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "semester"
-                ? "bg-green-600/10 border-green-500/50"
-                : "bg-gray950/50 border-gray800 hover:border-gray600"
-                }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <input
-                  type="radio"
-                  name="aiMode"
-                  className="hidden"
-                  checked={viewMode === "semester"}
-                  onChange={() => setViewMode("semester")}
-                />
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "semester"
-                    ? "border-green-500"
-                    : "border-gray600 group-hover:border-gray400"
-                    }`}
-                >
-                  {viewMode === "semester" && (
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-accent-light">
-                  <Users size={16} className="text-green-500" /> Feedback 1:1
-                </div>
-              </div>
-              <p className="text-xs text-accent-light/70 ml-7">
-                Foco: Evolução semestral, projetos e colaboração.
-              </p>
-            </label>
-
-            <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "year"
-                ? "bg-accent/10 border-accent-light0/50"
-                : "bg-gray950/50 border-gray800 hover:border-gray600"
-                }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <input
-                  type="radio"
-                  name="aiMode"
-                  className="hidden"
-                  checked={viewMode === "year"}
-                  onChange={() => setViewMode("year")}
-                />
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "year"
-                    ? "border-accent-light0"
-                    : "border-gray600 group-hover:border-gray400"
-                    }`}
-                >
-                  {viewMode === "year" && (
-                    <div className="w-2 h-2 rounded-full bg-accent-light0"></div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-accent-light">
-                  <CalendarCheck size={16} className="text-accent-light0" />{" "}
-                  Retrospectiva Anual
-                </div>
-              </div>
-              <p className="text-xs text-accent-light/70 ml-7">
-                Foco: Visão holística do ano, constância e marcos.
-              </p>
-            </label>
+                  <div className="flex items-center gap-3 mb-2">
+                    <input
+                      type="radio"
+                      name="aiMode"
+                      className="hidden"
+                      checked={isActive}
+                      onChange={() => setViewMode(mode.id)}
+                    />
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isActive
+                        ? mode.borderColor
+                        : "border-gray600 group-hover:border-gray400"
+                        }`}
+                    >
+                      {isActive && (
+                        <div
+                          className={`w-2.5 h-2.5 rounded-full ${mode.indicatorColor}`}
+                        ></div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 font-bold text-accent-light">
+                      <mode.icon size={24} className={mode.iconColor} />
+                      {mode.label}
+                    </div>
+                  </div>
+                  <p className="text-xs text-accent-light/70 ml-8">
+                    {mode.description}
+                  </p>
+                </label>
+              );
+            })}
 
             {userContext.isHRMode && (
               <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-xs text-purple-300 flex items-start gap-2">
@@ -310,9 +260,9 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
             <button
               onClick={generateAiSummary}
               disabled={generatingAi}
-              className={`w-full py-4 mt-4 rounded-xl font-bold shadow-lg transition-all transform active:scale-95 flex justify-center items-center gap-2 text-white ${generatingAi
-                ? "bg-gray800 cursor-not-allowed text-accent-light/70"
-                : "bg-gradient-to-r from-accent to-accent hover:from-accent-light0 hover:to-accent-light0 shadow-accent/30"
+              className={`botao-primario w-full justify-center ${generatingAi
+                ? "bg-surface-muted cursor-not-allowed text-accent-light"
+                : "cursor-pointer"
                 }`}
             >
               {generatingAi ? (
@@ -372,7 +322,7 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                 ))}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-gray800">
+              <div className="mt-8 pt-6 border-t border-gray-800">
                 <p className="text-xs text-accent-light/70 italic text-center">
                   Gerado por IA (DeepSeek Reasoner) • Revisão recomendada antes
                   de falar.
@@ -395,6 +345,6 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };

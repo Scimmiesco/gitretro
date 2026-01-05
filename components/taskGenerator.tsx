@@ -787,23 +787,30 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
       {/* ACTION BAR */}
       <div className="flex items-center gap-4">
-        <button
+        {/* <button
           onClick={processHeuristic}
-          className="flex-1 py-3 bg-accent hover:bg-accent-light0 text-white rounded-xl font-bold transition-all shadow-lg shadow-accent/20 active:scale-95 flex items-center justify-center gap-2"
+          className="flex-1 py-3 bg-accent hover:bg-accent-light text-surface rounded-xl font-bold transition-all shadow-lg shadow-accent/20 active:scale-95 flex items-center justify-center gap-2"
         >
           <Play size={18} /> Gerar Tarefas (Rápido)
-        </button>
+        </button> */}
         <button
           onClick={refineWithAI}
           disabled={loadingAi}
-          className="px-6 py-3 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="flex-1 px-6 py-2 
+          bg-accent hover:bg-accent-light 
+          text-surface rounded-xl
+          font-bold transition-colors
+          active:scale-95 
+          cursor-pointer
+          flex items-center
+          justify-center gap-2 disabled:opacity-50"
         >
           {loadingAi ? (
             <Loader2 size={18} className="animate-spin" />
           ) : (
             <Wand2 size={18} />
           )}
-          IA Magic
+          Gerar tarefas
         </button>
       </div>
 
