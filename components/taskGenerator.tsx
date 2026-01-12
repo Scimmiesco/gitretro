@@ -476,20 +476,23 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       let comp =
         t.complexity === "unica" ? "ÚNICA" : t.complexity.toUpperCase();
 
-      csv += `
-      ,"Task"
-      ,${tit}
-      ,"${config.assignedTo}"
-      ,"To Do"
-      ,"${t.taskId}"
-      ,"${t.estimateMade}"
-      ,"${t.estimateMade}" //efort
-      ,"${t.ustPoints}"
-      ,"Development"
-      ,"${comp}"
-      ,"${area}"
-      ,"${fullIter}"
-      ,${desc}\n`;
+      const row = [
+        "", // ID (empty)
+        "Task",
+        tit,
+        `"${config.assignedTo}"`,
+        "To Do",
+        `"${t.taskId}"`,
+        `"${t.estimateMade ?? 0}"`,
+        `"${t.ustPoints}"`,
+        "Development",
+        `"${comp}"`,
+        `"${area}"`,
+        `"${fullIter}"`,
+        desc,
+      ].join(",");
+
+      csv += row + "\n";
     });
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
