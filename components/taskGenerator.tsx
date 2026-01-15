@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Provider, UserContext, AzureRepository } from "../types";
-import { fetchAreaPaths, fetchRecentCommitsForRepo } from "../services/azure";
+import { fetchAreaPaths, fetchRecentCommitsForRepo, fetchWorkItemsByType } from "../services/azure";
 import {
   fetchGitHubCommitDiff,
   fetchAzureCommitDiff,
@@ -43,6 +43,10 @@ interface Task {
   estimateMade: number;
   source: string;
   kbIndex: number;
+  relatedCommitId?: string;
+  relatedCommitUrl?: string; // URL for hyperlink in description
+  relatedCommitMsg?: string;
+  contractItem?: string;
 }
 
 interface RepoMeta {
@@ -109,6 +113,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     ghCommit: "",
     azUrl: "",
     azCommit: "",
+    contractItem: "",
     azToken: token || "",
   });
 
@@ -116,6 +121,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
   const [selectedRepoId, setSelectedRepoId] = useState<string>("");
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const [areaPaths, setAreaPaths] = useState<string[]>([]);
+  const [contractItems, setContractItems] = useState<{ id: string; title: string }[]>([]);
   const [recentCommits, setRecentCommits] = useState<any[]>([]);
   const [selectedCommitId, setSelectedCommitId] = useState<string>("");
 
@@ -143,6 +149,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       // Token de API geralmente não salvamos ou salvamos com cuidado.
       // O user snippet salvava, então manteremos a consistencia se desejado,
       // mas aqui optei por usar o props 'token' como default se disponivel.
+      contractItem: load("contractItem"),
     }));
   }, []);
 
@@ -179,6 +186,15 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
           azureConfig.token
         );
         setRecentCommits(commits);
+
+        // 3. Fetch Contract Items
+        const items = await fetchWorkItemsByType(
+          azureConfig.org,
+          repo.project.name,
+          'Item Contrato',
+          azureConfig.token
+        );
+        setContractItems(items);
       } catch (e) {
         console.error(e);
       } finally {
@@ -396,6 +412,13 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         coherentDescription:
           descInput || "Alterações realizadas nos arquivos do sistema.",
         source: "Heurística (Auto)",
+        relatedCommitId: config.azCommit || config.ghCommit,
+        relatedCommitUrl: config.azUrl
+          ? `${config.azUrl}/commit/${config.azCommit}`
+          : config.ghRepo
+            ? `https://github.com/${config.ghRepo}/commit/${config.ghCommit}`
+            : undefined,
+        contractItem: config.contractItem,
       });
     });
 
@@ -443,6 +466,13 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
           customTitle: item.summary,
           coherentDescription: item.description,
           source: "IA Refinada (DeepSeek)",
+          relatedCommitId: config.azCommit || config.ghCommit,
+          relatedCommitUrl: config.azUrl
+            ? `${config.azUrl}/commit/${config.azCommit}`
+            : config.ghRepo
+              ? `https://github.com/${config.ghRepo}/commit/${config.ghCommit}`
+              : undefined,
+          contractItem: config.contractItem,
         };
       });
 
@@ -472,24 +502,35 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
     tasks.forEach((t) => {
       const tit = `"${t.customTitle.replace(/"/g, '""')}"`;
-      const desc = `"${t.coherentDescription.replace(/"/g, '""')}"`;
+      let descContent = t.coherentDescription;
+      if (t.contractItem) {
+        descContent += `\n\nItem Contrato: ${t.contractItem}`;
+      }
+      if (t.relatedCommitUrl) {
+        descContent += `<a href="${t.relatedCommitUrl}" target="_blank">\n\nCommit Original: ${t.relatedCommitUrl}</a>`;
+      }
+
+      const desc = `"${descContent.replace(/"/g, '""')}"`;
       let comp =
         t.complexity === "unica" ? "ÚNICA" : t.complexity.toUpperCase();
 
-      csv += `
-      ,"Task"
-      ,${tit}
-      ,"${config.assignedTo}"
-      ,"To Do"
-      ,"${t.taskId}"
-      ,"${t.estimateMade}"
-      ,"${t.estimateMade}" //efort
-      ,"${t.ustPoints}"
-      ,"Development"
-      ,"${comp}"
-      ,"${area}"
-      ,"${fullIter}"
-      ,${desc}\n`;
+      const row = [
+        "", // ID (empty)
+        "Task",
+        tit,
+        `"${config.assignedTo}"`,
+        "To Do",
+        `"${t.taskId}"`,
+        `"${t.estimateMade ?? 0}"`,
+        `"${t.ustPoints}"`,
+        "Development",
+        `"${comp}"`,
+        `"${area}"`,
+        `"${fullIter}"`,
+        desc,
+      ].join(",");
+
+      csv += row + "\n";
     });
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -529,9 +570,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     if (c === "baixa")
       return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
     if (c === "media")
-      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      return "bg-accent-light0/20 text-accent border-accent-light0/30";
     if (c === "alta") return "bg-red-500/20 text-red-400 border-red-500/30";
-    return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+    return "bg-accent-light0/20 text-accent border-accent-light0/30";
   };
 
   return (
@@ -542,7 +583,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
           onClick={() => setViewConfig(!viewConfig)}
           className="w-full flex items-center justify-between p-2 bg-surface hover:bg-surface-muted transition-colors cursor-pointer"
         >
-          <h3 className="font-bold text-yellow-50 flex items-center gap-2">
+          <h3 className="font-bold text-accent-light flex items-center gap-2">
             Configuração & Origem
           </h3>
           {viewConfig ? (
@@ -555,9 +596,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         {viewConfig && (
           <div className="p-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
             {/* 1. Global Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
               <div>
-                <label className="text-xs font-bold uppercase text-yellow-100/70 mb-1 block">
+                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
                   Assigned To
                 </label>
                 <input
@@ -570,7 +611,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                 />
               </div>
               <div>
-                <label className="text-xs font-bold uppercase text-yellow-100/70 mb-1 block">
+                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
                   Iteration Path
                 </label>
                 <input
@@ -583,13 +624,31 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                   }
                 />
               </div>
+              {/* CONTRACT ITEM */}
+              <div className="">
+                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
+                  Item Contrato
+                </label>
+                <input
+                  list="contract-items"
+                  className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm text-accent-light"
+                  placeholder="Selecione ou digite..."
+                  value={config.contractItem}
+                  onChange={(e) => setConfig({ ...config, contractItem: e.target.value })}
+                />
+                <datalist id="contract-items">
+                  {contractItems.map(item => (
+                    <option key={item.id} value={`${item.id} - ${item.title}`} />
+                  ))}
+                </datalist>
+              </div>
               <div>
-                <label className="text-xs font-bold uppercase text-yellow-100/70 mb-1 block">
+                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
                   Area Path
                 </label>
                 {azureConfig && selectedRepos ? (
                   <select
-                    className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm text-yellow-50 outline-none"
+                    className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm text-accent-light outline-none"
                     value={config.areaPath}
                     onChange={(e) =>
                       setConfig({ ...config, areaPath: e.target.value })
@@ -622,7 +681,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
             <div className=" p-2 rounded-md">
               {azureConfig && selectedRepos && (
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center gap-2 text-yellow-400 font-bold text-sm">
+                  <div className="flex justify-between items-center gap-2 text-accent font-bold text-sm">
                     <div className="flex justify-end align-center w-full">
                       <button
                         onClick={() => setReloadTrigger((prev) => prev + 1)}
@@ -649,11 +708,11 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
                   <div className="flex w-full gap-2">
                     <div className="flex flex-col flex-1">
-                      <label className="text-[10px] font-bold uppercase text-yellow-100/70 mb-1 block">
+                      <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 block">
                         Repositório Selecionado
                       </label>
                       <select
-                        className="w-full bg-gray900 border border-gray700 rounded p-2 text-xs text-white focus:border-yellow-500 outline-none"
+                        className="w-full bg-gray900 border border-gray700 rounded p-2 text-xs text-white focus:border-accent-light0 outline-none"
                         value={selectedRepoId}
                         onChange={(e) => setSelectedRepoId(e.target.value)}
                       >
@@ -665,7 +724,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                       </select>
                     </div>
                     <div className="flex flex-col flex-1">
-                      <label className="text-[10px] font-bold uppercase text-yellow-100/70 mb-1 block">
+                      <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 block">
                         Repositório Selecionado
                       </label>
 
@@ -745,13 +804,12 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
             {/* Status Message */}
             {statusMsg && (
               <div
-                className={`p-3 rounded text-xs font-bold flex items-center gap-2 ${
-                  statusMsg.type === "error"
-                    ? "bg-red-500/10 text-red-400"
-                    : statusMsg.type === "success"
+                className={`p-3 rounded text-xs font-bold flex items-center gap-2 ${statusMsg.type === "error"
+                  ? "bg-red-500/10 text-red-400"
+                  : statusMsg.type === "success"
                     ? "bg-emerald-500/10 text-emerald-400"
-                    : "bg-gray800 text-yellow-100/70"
-                }`}
+                    : "bg-gray800 text-accent-light/70"
+                  }`}
               >
                 {statusMsg.msg}
               </div>
@@ -763,22 +821,22 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       {/* INPUT AREA */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase text-yellow-100/70">
+          <label className="text-xs font-bold uppercase text-accent-light/70">
             Descrição Técnica
           </label>
           <textarea
-            className="w-full h-32 bg-gray950 border border-gray800 rounded-lg p-3 text-sm focus:ring-2 focus:ring-yellow-500/50 outline-none resize-none"
+            className="w-full h-32 bg-gray950 border border-gray800 rounded-lg p-3 text-sm focus:ring-2 focus:ring-accent-light0/50 outline-none resize-none"
             placeholder="Descreva o que foi feito..."
             value={descInput}
             onChange={(e) => setDescInput(e.target.value)}
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase text-yellow-100/70">
+          <label className="text-xs font-bold uppercase text-accent-light/70">
             Diff / Arquivos Afetados
           </label>
           <textarea
-            className="w-full h-32  rounded-lg p-3 text-sm font-mono text-yellow-100/70 focus:ring-2 focus:ring-yellow-500/50 outline-none resize-none"
+            className="w-full h-32  rounded-lg p-3 text-sm font-mono text-accent-light/70 focus:ring-2 focus:ring-accent-light0/50 outline-none resize-none"
             placeholder="Cole o diff ou lista de arquivos..."
             value={diffInput}
             onChange={(e) => setDiffInput(e.target.value)}
@@ -788,23 +846,30 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
       {/* ACTION BAR */}
       <div className="flex items-center gap-4">
-        <button
+        {/* <button
           onClick={processHeuristic}
-          className="flex-1 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-yellow-900/20 active:scale-95 flex items-center justify-center gap-2"
+          className="flex-1 py-3 bg-accent hover:bg-accent-light text-surface rounded-xl font-bold transition-all shadow-lg shadow-accent/20 active:scale-95 flex items-center justify-center gap-2"
         >
           <Play size={18} /> Gerar Tarefas (Rápido)
-        </button>
+        </button> */}
         <button
           onClick={refineWithAI}
           disabled={loadingAi}
-          className="px-6 py-3 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="flex-1 px-6 py-2 
+          bg-accent hover:bg-accent-light 
+          text-surface rounded-xl
+          font-bold transition-colors
+          active:scale-95 
+          cursor-pointer
+          flex items-center
+          justify-center gap-2 disabled:opacity-50"
         >
           {loadingAi ? (
             <Loader2 size={18} className="animate-spin" />
           ) : (
             <Wand2 size={18} />
           )}
-          IA Magic
+          Gerar tarefas
         </button>
       </div>
 
@@ -815,14 +880,14 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
             <h3 className="font-bold text-white flex items-center gap-2">
               <CheckCircle2 className="text-emerald-500" size={18} />
               Tarefas Geradas{" "}
-              <span className="text-xs bg-gray800 px-2 py-0.5 rounded-full text-yellow-100/70">
+              <span className="text-xs bg-gray800 px-2 py-0.5 rounded-full text-accent-light/70">
                 {tasks.length}
               </span>
             </h3>
             <div className="flex gap-2">
               <button
                 onClick={() => setTasks([])}
-                className="p-2 text-yellow-100/70 hover:text-red-400 transition-colors"
+                className="p-2 text-accent-light/70 hover:text-red-400 transition-colors"
               >
                 <Trash2 size={16} />
               </button>
@@ -842,7 +907,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                 className="bg-gray900 border border-gray800 rounded-xl p-4 shadow-sm hover:border-gray700 transition-all group"
               >
                 <div className="flex items-start gap-4">
-                  <div className="mt-1 p-2 bg-gray950 rounded text-yellow-100/70 font-mono text-xs border border-gray800">
+                  <div className="mt-1 p-2 bg-gray950 rounded text-accent-light/70 font-mono text-xs border border-gray800">
                     #{task.taskId}
                   </div>
 
@@ -850,19 +915,24 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        className="flex-1 bg-transparent border-b border-transparent hover:border-gray700 focus:border-yellow-500 outline-none text-white font-semibold placeholder-gray600 transition-colors"
+                        className="flex-1 bg-transparent border-b border-transparent hover:border-gray700 focus:border-accent-light0 outline-none text-white font-semibold placeholder-gray600 transition-colors"
                         value={task.customTitle}
                         onChange={(e) =>
                           updateTask(idx, "customTitle", e.target.value)
                         }
                       />
-                      <span className="text-[10px] uppercase font-bold text-yellow-100/70 tracking-wider self-center">
+                      <span className="text-[10px] uppercase font-bold text-accent-light/70 tracking-wider self-center">
                         {task.source}
                       </span>
+                      {task.relatedCommitId && (
+                        <span className="text-[10px] items-center flex gap-1 font-mono text-emerald-400 bg-emerald-400/10 px-1 rounded border border-emerald-400/20" title={task.relatedCommitId}>
+                          <GitCommit size={10} /> {task.relatedCommitId.substring(0, 7)}
+                        </span>
+                      )}
                     </div>
 
                     <textarea
-                      className="w-full bg-gray950/50 rounded p-2 text-sm text-yellow-50 outline-none border border-transparent focus:border-gray700 resize-none"
+                      className="w-full bg-gray950/50 rounded p-2 text-sm text-accent-light outline-none border border-transparent focus:border-gray700 resize-none"
                       rows={2}
                       value={task.coherentDescription}
                       onChange={(e) =>
@@ -872,11 +942,11 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
                     <div className="flex flex-wrap items-center gap-4">
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-yellow-100/70">
+                        <label className="text-[10px] font-bold uppercase text-accent-light/70">
                           Categoria
                         </label>
                         <select
-                          className="bg-gray950 border border-gray800 rounded px-2 py-1 text-xs text-yellow-50 outline-none"
+                          className="bg-gray950 border border-gray800 rounded px-2 py-1 text-xs text-accent-light outline-none"
                           value={task.kbIndex}
                           onChange={(e) =>
                             updateTask(idx, "kbIndex", parseInt(e.target.value))
@@ -891,17 +961,16 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-yellow-100/70">
+                        <label className="text-[10px] font-bold uppercase text-accent-light/70">
                           Complexidade
                         </label>
                         <select
-                          className={`bg-gray950 border border-gray800 rounded px-2 py-1 text-xs outline-none font-bold ${
-                            task.complexity === "alta"
-                              ? "text-red-400"
-                              : task.complexity === "media"
-                              ? "text-yellow-400"
+                          className={`bg-gray950 border border-gray800 rounded px-2 py-1 text-xs outline-none font-bold ${task.complexity === "alta"
+                            ? "text-red-400"
+                            : task.complexity === "media"
+                              ? "text-accent"
                               : "text-emerald-400"
-                          }`}
+                            }`}
                           value={task.complexity}
                           onChange={(e) =>
                             updateTask(idx, "complexity", e.target.value)
@@ -918,7 +987,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-yellow-100/70">
+                        <label className="text-[10px] font-bold uppercase text-accent-light/70">
                           UST
                         </label>
                         <div
@@ -931,7 +1000,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-yellow-100/70">
+                        <label className="text-[10px] font-bold uppercase text-accent-light/70">
                           Horas
                         </label>
                         <input
@@ -950,7 +1019,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
                       <button
                         onClick={() => removeTask(idx)}
-                        className="ml-auto text-yellow-100/70 hover:text-red-400 transition-colors"
+                        className="ml-auto text-accent-light/70 hover:text-red-400 transition-colors"
                       >
                         <Trash2 size={14} />
                       </button>

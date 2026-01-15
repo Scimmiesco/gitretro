@@ -94,10 +94,10 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
             <FolderGit2 size={24} />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-yellow-50 leading-tight">
+            <h2 className="text-lg font-bold text-accent-light leading-tight">
               Selecione os repositórios{" "}
             </h2>
-            <div className="text-xs text-yellow-100/70">
+            <div className="text-xs text-accent-light/70">
               {selectedRepoIds.length === 0
                 ? "Nenhum repositório selecionado"
                 : `${reposSelecionados.map((r) => r.name).join(" - ")}`}
@@ -109,9 +109,9 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
         <div className="flex items-center gap-3 w-full md:w-auto relative">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="flex-1 md:flex-none flex items-center justify-between gap-3 px-4 py-2 bg-gray-950 border border-yellow-50 rounded-md text-sm font-medium text-yellow-50 hover:bg-gray-750 transition-colors min-w-[200px]"
+            className="flex-1 md:flex-none flex items-center justify-between gap-3 px-4 py-2 bg-gray-950 border border-accent-light rounded-md text-sm font-medium text-accent-light hover:bg-gray-750 transition-colors min-w-[200px]"
           >
-            <span className="text-yellow-50">
+            <span className="text-accent-light">
               {selectedRepoIds.length > 0
                 ? `${selectedRepoIds.length} Selecionados`
                 : "Selecionar Repositórios"}
@@ -140,7 +140,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
               <div className="p-3 border-b border-surface bg-surface-muted">
                 <div className="relative">
                   <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-100"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-accent-light"
                     size={16}
                   />
                   <input
@@ -152,7 +152,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                     autoFocus
                   />
                 </div>
-                <div className="flex items-center justify-between mt-2 text-[10px] text-yellow-100/70 px-1">
+                <div className="flex items-center justify-between mt-2 text-[10px] text-accent-light/70 px-1">
                   <span>{filteredRepos.length} encontrados</span>
                   <div className="flex gap-2">
                     <button
@@ -184,7 +184,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                                                 flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors group border-2 border-transparent
                                                  ${isSelected
                           ? "bg-orange-800/20 border-2 border-orange-700/70"
-                          : "hover:bg-gray-950 hover:border-2 hover:border-yellow-100"
+                          : "hover:bg-gray-950 hover:border-2 hover:border-accent-light"
                         }`}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -192,8 +192,8 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                           onClick={(e) => toggleFavorite(e, repo.id)}
                           className={`p-1 rounded-md transition-colors 
                                                         ${isFavorite
-                              ? "text-yellow-400 hover:text-yellow-300"
-                              : "text-yellow-100 hover:text-yellow-500 hover:bg-yellow-500/10"
+                              ? "text-accent hover:text-accent-light"
+                              : "text-accent-light hover:text-accent-light0 hover:bg-accent-light0/10"
                             }`}
                           title={
                             isFavorite
@@ -208,12 +208,12 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                         </button>
                         <div className="min-w-0">
                           <div
-                            className={`text-sm font-medium truncate ${isSelected ? "text-orange-600" : "text-yellow-50"
+                            className={`text-sm font-medium truncate ${isSelected ? "text-orange-600" : "text-accent-light"
                               }`}
                           >
                             {repo.name}
                           </div>
-                          <div className="text-[10px]  text-yellow-100/70 truncate">
+                          <div className="text-[10px]  text-accent-light/70 truncate">
                             {repo.project.name}
                           </div>
                         </div>
@@ -228,7 +228,7 @@ export const RepositorySelector: React.FC<RepositorySelectorProps> = ({
                   );
                 })}
                 {filteredRepos.length === 0 && (
-                  <div className="p-4 text-center text-xs text-yellow-100/70">
+                  <div className="p-4 text-center text-xs text-accent-light/70">
                     Nenhum repositório encontrado.
                   </div>
                 )}

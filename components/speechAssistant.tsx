@@ -34,6 +34,50 @@ interface SpeechAssistantProps {
 }
 
 type ViewMode = "daily" | "sprint" | "semester" | "year";
+
+const VIEW_MODES = [
+  {
+    id: "daily" as const,
+    label: "Daily Stand-up",
+    icon: Coffee,
+    description: "Foco: Ontem vs Hoje. O que foi feito e impedimentos.",
+    activeClass: "!bg-accent/10",
+    indicatorColor: "bg-accent",
+    borderColor: "border-accent",
+    iconColor: "text-accent",
+  },
+  {
+    id: "sprint" as const,
+    label: "Review da Sprint",
+    icon: Zap,
+    description: "Foco: Entregas de valor, funcionalidades e dematadas.",
+    activeClass: "!bg-purple-500/10",
+    indicatorColor: "bg-purple-500",
+    borderColor: "border-purple-500",
+    iconColor: "text-accent-light",
+
+  },
+  {
+    id: "semester" as const,
+    label: "Feedback 1:1",
+    icon: Users,
+    description: "Foco: Evolução semestral, projetos e colaboração.",
+    activeClass: "!bg-green-500/10",
+    indicatorColor: "bg-green-500",
+    borderColor: "border-green-500",
+    iconColor: "text-green-500",
+  },
+  {
+    id: "year" as const,
+    label: "Retrospectiva Anual",
+    icon: CalendarCheck,
+    description: "Foco: Visão holística do ano, constância e marcos.",
+    activeClass: "!bg-blue-600/10",
+    indicatorColor: "bg-accent-light",
+    borderColor: "border-accent-light",
+    iconColor: "text-accent-light",
+  },
+];
 export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
   userContext,
   setUserContext,
@@ -100,8 +144,12 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
             const data = await fetchAzureCommitDiff(c.url, c.sha, token);
             details = `[Full Message]: ${data.description
               }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
+            details = `[Full Message]: ${data.description
+              }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
           } else if (c.url.includes("github")) {
             const data = await fetchGitHubCommitDiff(c.repo, c.sha, token);
+            details = `[Full Message]: ${data.description
+              }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
             details = `[Full Message]: ${data.description
               }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
           }
@@ -156,8 +204,22 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
         <ContextSelector context={userContext} onChange={setUserContext} />
 
         {/* AI Controls */}
-        <div className=" container-destacado">
+        <div className="container-destacado">
           <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+          <h3 className="flex items-center gap-2 font-bold text-accent-light p-2">
+            <BrainCircuit className="text-accent" size="24" /> Gerar Discurso
+          </h3>
+
+          <div className="space-y-2">
+            {VIEW_MODES.map((mode) => {
+              const isActive = viewMode === mode.id;
+              return (
+                <label
+                  key={mode.id}
+                  className={`container-destacado block cursor-pointer transition-all group ${isActive ? mode.activeClass : ""
+                    }`}
+                >
+                  <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
           <div className="flex justify-between p-2  ">
             <h3 className="flex items-center gap-2 font-bold text-accent-light p-2">
               <BrainCircuit className="text-accent" size="24" /> Gerar Discurso
@@ -199,6 +261,37 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
             >
               <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
 
+                  <div className="flex items-center gap-3 mb-2">
+                    <input
+                      type="radio"
+                      name="aiMode"
+                      className="hidden"
+                      checked={isActive}
+                      onChange={() => setViewMode(mode.id)}
+                    />
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isActive
+                        ? mode.borderColor
+                        : "border-gray600 group-hover:border-gray400"
+                        }`}
+                    >
+                      {isActive && (
+                        <div
+                          className={`w-2.5 h-2.5 rounded-full ${mode.indicatorColor}`}
+                        ></div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 font-bold text-accent-light">
+                      <mode.icon size={24} className={mode.iconColor} />
+                      {mode.label}
+                    </div>
+                  </div>
+                  <p className="text-xs text-accent-light/70 ml-8">
+                    {mode.description}
+                  </p>
+                </label>
+              );
+            })}
               <div className="flex items-center gap-3 mb-2">
                 <input
                   type="radio"
@@ -327,6 +420,37 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
               </p>
             </label>
 
+            {
+                userContext.isHRMode && (
+                  <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-xs text-purple-300 flex items-start gap-2">
+                    <Users size={14} className="mt-0.5 shrink-0" />
+                    Modo RH Ativo: O relatório será gerado na terceira pessoa,
+                    focado em avaliação de performance.
+                  </div>
+                )
+              }
+
+              <button
+                onClick={generateAiSummary}
+                disabled={generatingAi}
+                className={`botao-primario w-full justify-center ${generatingAi
+                  ? "bg-surface-muted cursor-not-allowed text-accent-light"
+                  : "cursor-pointer"
+                  }`}
+              >
+                {generatingAi ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Criando Roteiro...</span>
+                  </>
+                ) : (
+                  <>
+                    <MessageSquareText size={20} />
+                    Gerar Roteiro{" "}
+                    {userContext.isHRMode ? "de Avaliação" : "de Fala"}
+                  </>
+                )}
+              </button>
           </div>
         </div>
       </div>
@@ -345,6 +469,10 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                     onClick={copyToClipboard}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${copied
                       ? "bg-green-500/20 text-green-400"
+                      : "bg-gray800 text-accent-light/70 hover:bg-gray700 hover:text-white"
+                      }`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${copied
+                      ? "bg-green-500/20 text-green-400"
                       : "bg-gray800 text-yellow-100/70 hover:bg-gray700 hover:text-white"
                       }`}
                   >
@@ -354,7 +482,7 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                 </div>
               </div>
 
-              <div className="prose prose-invert max-w-none prose-p:text-yellow-50 prose-headings:text-white prose-strong:text-yellow-400 prose-ul:text-yellow-50">
+              <div className="prose prose-invert max-w-none prose-p:text-accent-light prose-headings:text-white prose-strong:text-accent prose-ul:text-accent-light">
                 {/* Split summary by lines and render delicately */}
                 {aiSummary.split("\n").map((line, i) => (
                   <p
@@ -362,8 +490,12 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                     className={`mb-2 leading-relaxed ${line.startsWith("#")
                       ? "text-lg font-bold text-white mt-4"
                       : line.startsWith("-")
+                    className={`mb-2 leading-relaxed ${line.startsWith("#")
+                      ? "text-lg font-bold text-white mt-4"
+                      : line.startsWith("-")
                         ? "ml-4"
                         : ""
+                      }`}
                       }`}
                   >
                     {line.replaceAll("#", "").trim()}
@@ -371,29 +503,29 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                 ))}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-gray800">
-                <p className="text-xs text-yellow-100/70 italic text-center">
+              <div className="mt-8 pt-6 border-t border-gray-800">
+                <p className="text-xs text-accent-light/70 italic text-center">
                   Gerado por IA (DeepSeek Reasoner) • Revisão recomendada antes
                   de falar.
                 </p>
               </div>
             </div>
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-yellow-100/70 p-8 text-center opacity-60">
-              <div className="w-24 h-24 bg-gray800 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                <BrainCircuit size={48} className="text-yellow-100/70" />
-              </div>
-              <h3 className="text-xl font-bold text-yellow-100/70 mb-2">
-                Aguardando geração
-              </h3>
-              <p className="max-w-md">
-                Configure o seu contexto ao lado e clique em "Gerar Roteiro"
-                para criar um discurso personalizado para sua Daily ou Review.
-              </p>
-            </div>
-          )}
+        ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-accent-light/70 p-8 text-center opacity-60">
+          <div className="w-24 h-24 bg-gray800 rounded-full flex items-center justify-center mb-6 animate-pulse">
+            <BrainCircuit size={48} className="text-accent-light/70" />
+          </div>
+          <h3 className="text-xl font-bold text-accent-light/70 mb-2">
+            Aguardando geração
+          </h3>
+          <p className="max-w-md">
+            Configure o seu contexto ao lado e clique em "Gerar Roteiro"
+            para criar um discurso personalizado para sua Daily ou Review.
+          </p>
         </div>
+          )}
       </div>
     </div>
+    </div >
   );
 };

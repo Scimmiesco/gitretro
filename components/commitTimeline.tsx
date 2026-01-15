@@ -124,12 +124,12 @@ export const CommitTimeline = ({ stats, token, provider }) => {
 
           {/* Search Filter */}
           <div className="">
-            <label className="text-xs font-bold uppercase text-yellow-100/70 mb-2 block">
+            <label className="text-xs font-bold uppercase text-accent-light/70 mb-2 block">
               Buscar
             </label>
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-100/70"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-accent-light/70"
                 size={16}
               />
               <input
@@ -144,16 +144,15 @@ export const CommitTimeline = ({ stats, token, provider }) => {
 
           {/* Category Filter */}
           <div className="flex-1">
-            <label className="text-xs font-bold uppercase text-yellow-100/70 mb-2 block">
+            <label className="text-xs font-bold uppercase text-accent-light/70 mb-2 block">
               Categorias
             </label>
             <div className="space-y-1">
               <button
                 onClick={() => setSelectedCategory(null)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                  selectedCategory === null &&
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === null &&
                   "bg-accent text-surface font-bold"
-                }`}
+                  }`}
               >
                 Todas as categorias
               </button>
@@ -161,28 +160,25 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between group ${
-                    selectedCategory === cat
-                      ? "text-white border-2 border-accent-light"
-                      : "text-accent-light "
-                  }`}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between group ${selectedCategory === cat
+                    ? "text-white border-2 border-accent-light"
+                    : "text-accent-light "
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span
-                      className={`opacity-70 group-hover:opacity-100 transition-all group-hover:scale-115  ${
-                        selectedCategory === cat && "opacity-100 scale-115"
-                      }`}
+                      className={`opacity-70 group-hover:opacity-100 transition-all group-hover:scale-115  ${selectedCategory === cat && "opacity-100 scale-115"
+                        }`}
                     >
                       {getCategoryEmoji(cat)}
                     </span>
                     <span className="truncate">{getCategoryLabel(cat)}</span>
                   </div>
                   <span
-                    className={`text-xs px-1.5 py-0.5 rounded ${
-                      selectedCategory === cat
-                        ? "bg-accent text-surface font-bold"
-                        : "text-accent-white"
-                    }`}
+                    className={`text-xs px-1.5 py-0.5 rounded ${selectedCategory === cat
+                      ? "bg-accent text-surface font-bold"
+                      : "text-accent-white"
+                      }`}
                   >
                     {commitCounts[cat]}
                   </span>
@@ -297,21 +293,21 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                           {/* TASK CONTEXT SECTION */}
                           {commit.taskInfo && (
                             <div className="rounded-md p-2 border border-gray800/50 flex flex-col gap-1 relative overflow-hidden">
-                              <div className="absolute top-0 right-0 w-16 h-16 bg-yellow-500/5 rounded-bl-full pointer-events-none"></div>
+                              <div className="absolute top-0 right-0 w-16 h-16 bg-accent-light0/5 rounded-bl-full pointer-events-none"></div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-yellow-400 uppercase tracking-wider">
+                                <span className="text-xs font-bold text-accent uppercase tracking-wider">
                                   {commit.taskInfo.type} {commit.taskInfo.id}
                                 </span>
-                                <span className="bg-gray800 text-yellow-50 text-[10px] px-1.5 py-0.5 rounded border border-gray700">
+                                <span className="bg-gray800 text-accent-light text-[10px] px-1.5 py-0.5 rounded border border-gray700">
                                   {commit.taskInfo.sprint}
                                 </span>
                               </div>
-                              <h4 className="text-sm font-semibold text-yellow-50 truncate">
+                              <h4 className="text-sm font-semibold text-accent-light truncate">
                                 {commit.taskInfo.title}
                               </h4>
-                              <div className="text-[10px] text-yellow-100/70 flex items-center gap-1">
+                              <div className="text-[10px] text-accent-light/70 flex items-center gap-1">
                                 <span className="opacity-70">Criado por:</span>{" "}
-                                <span className="text-yellow-100/70">
+                                <span className="text-accent-light/70">
                                   {commit.taskInfo.createdBy}
                                 </span>
                               </div>
@@ -325,7 +321,7 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                             {commit.body && (
                               <FileText
                                 size={24}
-                                className="text-yellow-100/70 shrink-0"
+                                className="text-accent-light/70 shrink-0"
                               />
                             )}
                           </div>
@@ -367,7 +363,7 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                             </span>
                           </div>
                         </div>
-                        <div className="text-yellow-100/70 group-hover:text-yellow-500 transition-colors self-center">
+                        <div className="text-accent-light/70 group-hover:text-accent-light0 transition-colors self-center">
                           <ArrowLeft size={16} className="rotate-180" />
                         </div>
                       </div>
@@ -380,13 +376,13 @@ export const CommitTimeline = ({ stats, token, provider }) => {
         })}
         {timelineGroups.length === 0 && (
           <div className="text-center py-20 opacity-50">
-            <div className="mb-4 bg-gray800 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-yellow-100/70">
+            <div className="mb-4 bg-gray800 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-accent-light/70">
               <GitBranch size={40} />
             </div>
-            <p className="text-xl font-bold text-yellow-100/70">
+            <p className="text-xl font-bold text-accent-light/70">
               Nenhum commit encontrado
             </p>
-            <p className="text-sm text-yellow-100/70 mt-2">
+            <p className="text-sm text-accent-light/70 mt-2">
               Tente ajustar seus filtros de busca.
             </p>
           </div>
