@@ -511,3 +511,60 @@ export const fetchRecentCommitsForRepo = async (
     return [];
   }
 };
+
+export const fetchWorkItemsByType = async (
+  org: string,
+  project: string,
+  workItemSelected: string,
+  token: string
+): Promise<{ id: string; title: string }[]> => {
+  const url = `/azure-api/${org}/${project}/_apis/wit/wiql?api-version=7.0`;
+  const headers = {
+    Authorization: "Basic " + btoa(":" + token),
+    "Content-Type": "application/json",
+  };
+
+  const query = `
+    SELECT [System.Id], [System.Title]
+    FROM WorkItems
+    WHERE [System.TeamProject] = @project
+      AND [System.WorkItemType] = '${workItemSelected}'
+      AND [System.State] <> 'Closed'
+      AND [System.State] <> 'Removed'
+    ORDER BY [System.ChangedDate] DESC
+  `;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ query }),
+    });
+
+    if (!res.ok) throw new Error(`Failed to fetch work items: ${res.statusText}`);
+
+    const data = await res.json();
+    const workItems = data.workItems || [];
+
+    if (workItems.length === 0) return [];
+
+    // Fetch details (titles) for the IDs found
+    // Limiting to 50 to avoid huge requests
+    const ids = workItems.slice(0, 50).map((wi: any) => wi.id);
+    const detailsUrl = `/azure-api/${org}/${project}/_apis/wit/workitems?ids=${ids.join(
+      ","
+    )}&fields=System.Id,System.Title&api-version=7.0`;
+
+    const detailsRes = await fetch(detailsUrl, { headers });
+    if (!detailsRes.ok) return [];
+
+    const detailsData = await detailsRes.json();
+    return (detailsData.value || []).map((wi: any) => ({
+      id: String(wi.id),
+      title: wi.fields["System.Title"],
+    }));
+  } catch (e) {
+    console.error(`[Azure Service] Error fetching work items of type ${workItemSelected}`, e);
+    return [];
+  }
+};

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Provider, UserContext, AzureRepository } from "../types";
-import { fetchAreaPaths, fetchRecentCommitsForRepo } from "../services/azure";
+import { fetchAreaPaths, fetchRecentCommitsForRepo, fetchWorkItemsByType } from "../services/azure";
 import {
   fetchGitHubCommitDiff,
   fetchAzureCommitDiff,
@@ -43,6 +43,10 @@ interface Task {
   estimateMade: number;
   source: string;
   kbIndex: number;
+  relatedCommitId?: string;
+  relatedCommitUrl?: string; // URL for hyperlink in description
+  relatedCommitMsg?: string;
+  contractItem?: string;
 }
 
 interface RepoMeta {
@@ -109,6 +113,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     ghCommit: "",
     azUrl: "",
     azCommit: "",
+    contractItem: "",
     azToken: token || "",
   });
 
@@ -116,6 +121,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
   const [selectedRepoId, setSelectedRepoId] = useState<string>("");
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const [areaPaths, setAreaPaths] = useState<string[]>([]);
+  const [contractItems, setContractItems] = useState<{ id: string; title: string }[]>([]);
   const [recentCommits, setRecentCommits] = useState<any[]>([]);
   const [selectedCommitId, setSelectedCommitId] = useState<string>("");
 
@@ -143,6 +149,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       // Token de API geralmente não salvamos ou salvamos com cuidado.
       // O user snippet salvava, então manteremos a consistencia se desejado,
       // mas aqui optei por usar o props 'token' como default se disponivel.
+      contractItem: load("contractItem"),
     }));
   }, []);
 
@@ -179,6 +186,15 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
           azureConfig.token
         );
         setRecentCommits(commits);
+
+        // 3. Fetch Contract Items
+        const items = await fetchWorkItemsByType(
+          azureConfig.org,
+          repo.project.name,
+          'Item Contrato',
+          azureConfig.token
+        );
+        setContractItems(items);
       } catch (e) {
         console.error(e);
       } finally {
@@ -396,6 +412,13 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         coherentDescription:
           descInput || "Alterações realizadas nos arquivos do sistema.",
         source: "Heurística (Auto)",
+        relatedCommitId: config.azCommit || config.ghCommit,
+        relatedCommitUrl: config.azUrl
+          ? `${config.azUrl}/commit/${config.azCommit}`
+          : config.ghRepo
+            ? `https://github.com/${config.ghRepo}/commit/${config.ghCommit}`
+            : undefined,
+        contractItem: config.contractItem,
       });
     });
 
@@ -443,6 +466,13 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
           customTitle: item.summary,
           coherentDescription: item.description,
           source: "IA Refinada (DeepSeek)",
+          relatedCommitId: config.azCommit || config.ghCommit,
+          relatedCommitUrl: config.azUrl
+            ? `${config.azUrl}/commit/${config.azCommit}`
+            : config.ghRepo
+              ? `https://github.com/${config.ghRepo}/commit/${config.ghCommit}`
+              : undefined,
+          contractItem: config.contractItem,
         };
       });
 
@@ -472,7 +502,15 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
     tasks.forEach((t) => {
       const tit = `"${t.customTitle.replace(/"/g, '""')}"`;
-      const desc = `"${t.coherentDescription.replace(/"/g, '""')}"`;
+      let descContent = t.coherentDescription;
+      if (t.contractItem) {
+        descContent += `\n\nItem Contrato: ${t.contractItem}`;
+      }
+      if (t.relatedCommitUrl) {
+        descContent += `<a href="${t.relatedCommitUrl}" target="_blank">\n\nCommit Original: ${t.relatedCommitUrl}</a>`;
+      }
+
+      const desc = `"${descContent.replace(/"/g, '""')}"`;
       let comp =
         t.complexity === "unica" ? "ÚNICA" : t.complexity.toUpperCase();
 
@@ -558,7 +596,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         {viewConfig && (
           <div className="p-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
             {/* 1. Global Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
               <div>
                 <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
                   Assigned To
@@ -585,6 +623,24 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                     setConfig({ ...config, iterationPath: e.target.value })
                   }
                 />
+              </div>
+              {/* CONTRACT ITEM */}
+              <div className="">
+                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
+                  Item Contrato
+                </label>
+                <input
+                  list="contract-items"
+                  className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm text-accent-light"
+                  placeholder="Selecione ou digite..."
+                  value={config.contractItem}
+                  onChange={(e) => setConfig({ ...config, contractItem: e.target.value })}
+                />
+                <datalist id="contract-items">
+                  {contractItems.map(item => (
+                    <option key={item.id} value={`${item.id} - ${item.title}`} />
+                  ))}
+                </datalist>
               </div>
               <div>
                 <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
@@ -868,6 +924,11 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                       <span className="text-[10px] uppercase font-bold text-accent-light/70 tracking-wider self-center">
                         {task.source}
                       </span>
+                      {task.relatedCommitId && (
+                        <span className="text-[10px] items-center flex gap-1 font-mono text-emerald-400 bg-emerald-400/10 px-1 rounded border border-emerald-400/20" title={task.relatedCommitId}>
+                          <GitCommit size={10} /> {task.relatedCommitId.substring(0, 7)}
+                        </span>
+                      )}
                     </div>
 
                     <textarea
