@@ -438,12 +438,19 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
   // --- AI REFINEMENT ---
   const refineWithAI = async () => {
+    console.log("--- INICIANDO REFINAMENTO COM IA ---");
+    console.log("Input Descrição:", descInput);
+    console.log("Input Diff (Tamanho):", diffInput?.length);
+
     setLoadingAi(true);
     try {
       const aiItems = await refineTaskWithAI(descInput, diffInput);
+      console.log("IA Retornou Items:", aiItems);
 
       // Convert AI items to Heuristic Tasks
       const convertedTasks = aiItems.map((item: any) => {
+        console.log("Processando Item IA:", item.summary);
+
         // Re-run classifier on AI output
         const rules = classifyComplexity(
           1,
@@ -456,6 +463,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         const points =
           (kb.complexities as any)[rules.complexity] ||
           Object.values(kb.complexities)[0];
+
+        // Ensure estimateMade logic (points vs 0) is consistent
+        // Previously requested: estimateMade = points
 
         return {
           taskId: kb.id,
@@ -476,32 +486,52 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         };
       });
 
+      console.log("Tarefas Convertidas:", convertedTasks);
       setTasks(convertedTasks);
       setStatusMsg({ msg: "Tarefas refinadas com IA!", type: "success" });
     } catch (e: any) {
+      console.error("Erro no Refinamento IA:", e);
       setStatusMsg({ msg: "Erro IA: " + e.message, type: "error" });
     } finally {
       setLoadingAi(false);
+      console.log("--- REFINAMENTO CONCLUÍDO ---");
     }
   };
 
   // --- EXPORT ---
   const exportCsv = () => {
-    if (tasks.length === 0) return;
+    console.log("--- INICIANDO EXPORTAÇÃO CSV ---");
+    console.log("Tarefas a exportar:", tasks.length);
 
+    if (tasks.length === 0) {
+      console.warn("Nenhuma tarefa para exportar.");
+      return;
+    }
+
+    // Header do CSV - Verifique se estes nomes batem com o Azure DevOps Import
     let csv =
-      "ID,Work Item Type,Title,Assigned To,State,ID SPF,Effort,UST,Activity,Complexidade,Area Path,Iteration Path,Description\n";
+      "ID,Work Item Type,Title,Assigned To,State,ID SPF,Effort,Estimate Made,Item Contrato,UST,Activity,Complexidade,Area Path,Iteration Path,Description\n";
 
+    // Area Path Logic
     const area = config.areaPath || "Area\\Path";
-    // Logic for full iteration path based on snippet
+    console.log("Area Path Configurado:", area);
+
+    // Iteration Path Logic
     let fullIter = config.iterationPath;
     if (config.areaPath.includes("Refatoração"))
       fullIter = `SPF-SIAFIC\\Refatoração\\Refatoração - ${config.iterationPath}`;
     else if (config.areaPath.includes("Fábrica"))
       fullIter = `SPF-SIAFIC\\SPF Fábrica\\SPF - ${config.iterationPath}`;
 
-    tasks.forEach((t) => {
+    console.log("Iteration Path (Bruto):", config.iterationPath);
+    console.log("Iteration Path (Calculado):", fullIter);
+
+    tasks.forEach((t, index) => {
+      console.log(`Processando Tarefa #${index + 1}:`, t.customTitle);
+
+      // Tratamento de aspas para CSV (escapar aspas duplas com outra aspa dupla)
       const tit = `"${t.customTitle.replace(/"/g, '""')}"`;
+
       let descContent = t.coherentDescription;
       if (t.contractItem) {
         descContent += `\n\nItem Contrato: ${t.contractItem}`;
@@ -511,20 +541,38 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       }
 
       const desc = `"${descContent.replace(/"/g, '""')}"`;
+
+      // Mapeamento de Complexidade para maiúsculas ou termo específico
       let comp =
         t.complexity === "unica" ? "ÚNICA" : t.complexity.toUpperCase();
 
+      // Debug dos campos críticos
+      console.log({
+        Title: t.customTitle,
+        AssignedTo: config.assignedTo,
+        SPF_ID: t.taskId,
+        Effort: t.estimateMade ?? 0,
+        EstimateMade: t.estimateMade ?? 0,
+        ItemContrato: t.contractItem,
+        UST: t.ustPoints,
+        Complexity: comp,
+        Area: area,
+        Iteration: fullIter
+      });
+
       const row = [
-        "", // ID (empty)
-        "Task",
+        "", // ID (Azure gera automático na importação, deixar vazio)
+        "Task", // Work Item Type
         tit,
         `"${config.assignedTo}"`,
         "To Do",
-        `"${t.taskId}"`,
-        `"${t.estimateMade ?? 0}"`,
-        `"${t.ustPoints}"`,
-        "Development",
-        `"${comp}"`,
+        `"${t.taskId}"`, // ID SPF (Campo Customizado?)
+        `"${t.estimateMade ?? 0}"`, // Effort / Original Estimate
+        `"${t.estimateMade ?? 0}"`, // Estimate Made
+        `"${t.contractItem}"`, // Item Contrato
+        `"${t.ustPoints}"`, // UST Points (Campo Customizado?)
+        "Development", // Activity
+        `"${comp}"`, // Complexidade
         `"${area}"`,
         `"${fullIter}"`,
         desc,
@@ -533,11 +581,15 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       csv += row + "\n";
     });
 
+    console.log("CSV Gerado com sucesso. Iniciando download...");
+
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `tasks_${Date.now()}.csv`;
     link.click();
+
+    console.log("--- EXPORTAÇÃO CONCLUÍDA ---");
   };
 
   // --- UI HELPERS ---
@@ -648,7 +700,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                 </label>
                 {azureConfig && selectedRepos ? (
                   <select
-                    className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm text-accent-light outline-none"
+                    className="w-full bg-gray-950 border border-gray-800 rounded p-2 text-sm text-accent-light outline-none"
                     value={config.areaPath}
                     onChange={(e) =>
                       setConfig({ ...config, areaPath: e.target.value })
@@ -727,7 +779,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
                   {/* ADVANCED COMMIT SELECTOR */}
                   <div className="flex flex-col gap-2 border border-gray800 rounded-md p-2 bg-gray950/50">
-                    <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 block flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 flex justify-between items-center">
                       <span>Selecione um Commit</span>
                       <span className="text-[10px] normal-case bg-accent/10 px-1 rounded text-accent">
                         {recentCommits.length} carregados
@@ -773,9 +825,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                     </div>
 
                     {/* Commit List */}
-                    <div className="max-h-60 overflow-y-auto pr-1 space-y-1 custom-scrollbar">
+                    <div className="max-h-80 overflow-y-auto pr-1 space-y-2 custom-scrollbar">
                       {recentCommits.length === 0 ? (
-                        <div className="text-center p-4 text-xs text-gray-500">
+                        <div className="text-center p-4 text-sm text-gray-500">
                           Nenhum commit encontrado.
                         </div>
                       ) : (
@@ -783,22 +835,22 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                           <div
                             key={c.commitId}
                             onClick={() => handleCommitSelect(c.commitId)}
-                            className={`p-2 rounded cursor-pointer border transition-all ${selectedCommitId === c.commitId
-                                ? "bg-accent/20 border-accent text-white"
-                                : "bg-gray900 border-gray800 text-gray-400 hover:bg-gray800 hover:text-gray-300"
+                            className={`p-3 rounded-lg cursor-pointer border transition-all ${selectedCommitId === c.commitId
+                              ? "bg-accent/20 border-accent text-white"
+                              : "bg-gray900 border-gray800 text-gray-300 hover:bg-gray800 hover:text-white"
                               }`}
                           >
-                            <div className="flex justify-between items-start">
-                              <span className="text-xs font-bold truncate flex-1">
+                            <div className="flex justify-between items-start gap-2">
+                              <span className="text-md font-bold leading-tight flex-1">
                                 {c.comment.split('\n')[0]}
                               </span>
-                              <span className="text-[10px] font-mono opacity-70 ml-2 whitespace-nowrap">
+                              <span className="text-[12px] uppercase font-mono text-white whitespace-nowrap">
                                 {new Date(c.date).toLocaleDateString()}
                               </span>
                             </div>
-                            <div className="flex justify-between items-center mt-1">
-                              <div className="flex items-center gap-1 text-[10px]">
-                                <div className="w-4 h-4 rounded-full bg-gray700 flex items-center justify-center text-[8px] font-bold text-white overflow-hidden">
+                            <div className="flex justify-between items-center mt-2">
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <div className="w-6 h-6 rounded-full bg-surface flex items-center justify-center text-[12px] font-bold text-white overflow-hidden shadow-sm">
                                   {c.authorAvatar ? (
                                     <img
                                       src={c.authorAvatar}
@@ -809,9 +861,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                                     c.author.substring(0, 2).toUpperCase()
                                   )}
                                 </div>
-                                <span>{c.author}</span>
+                                <span className="font-medium truncate max-w-[120px]">{c.author}</span>
                               </div>
-                              <span className="text-[10px] font-mono bg-black/30 px-1 rounded">
+                              <span className="text-xs font-mono text-gray-500 bg-black/40 px-1.5 py-0.5 rounded-md">
                                 {c.commitId.substring(0, 7)}
                               </span>
                             </div>
@@ -837,7 +889,15 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                             recentCommits.length, // Skip existing
                             20 // Take next 20
                           ).then((moreCommits) => {
-                            setRecentCommits([...recentCommits, ...moreCommits]);
+                            // Filter Duplicates
+                            const existingIds = new Set(recentCommits.map(c => c.commitId));
+                            const uniqueNew = moreCommits.filter(c => !existingIds.has(c.commitId));
+
+                            if (uniqueNew.length === 0) {
+                              console.log("Nenhum commit novo encontrado ou todos duplicados.");
+                            }
+
+                            setRecentCommits([...recentCommits, ...uniqueNew]);
                             setLoading(false);
                           });
                         }}

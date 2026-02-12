@@ -152,7 +152,7 @@ export const CommitTimeline = ({ stats, token, provider }) => {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* Filters Sidebar */}
       <div className="lg:col-span-1 space-y-6">
-        <div className="container-destacado flex flex-col gap-2 justify-start rounded-md borde !sticky top-8 min-h-[50vh]">
+        <div className="container-destacado flex flex-col gap-2 justify-start rounded-md borde sticky! top-8 min-h-[50vh]">
           <div className="absolute top-0 right-0 w-64 h-24 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
           <h3 className="font-bold text-accent-light flex items-center gap-2">
             <span className="w-1 h-5 bg-accent rounded-full"></span>
@@ -172,7 +172,7 @@ export const CommitTimeline = ({ stats, token, provider }) => {
               <input
                 type="text"
                 placeholder="Mensagem, hash..."
-                className="w-full  !pl-8 p-2"
+                className="w-full  pl-8! p-2"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -188,8 +188,8 @@ export const CommitTimeline = ({ stats, token, provider }) => {
               <button
                 onClick={() => setGroupBy("repo")}
                 className={`flex-1 py-1 text-xs font-bold rounded transition-colors ${groupBy === "repo"
-                    ? "bg-accent text-surface"
-                    : "text-accent-light hover:text-white"
+                  ? "bg-accent text-surface"
+                  : "text-accent-light hover:text-white"
                   }`}
               >
                 Repositório
@@ -197,8 +197,8 @@ export const CommitTimeline = ({ stats, token, provider }) => {
               <button
                 onClick={() => setGroupBy("author")}
                 className={`flex-1 py-1 text-xs font-bold rounded transition-colors ${groupBy === "author"
-                    ? "bg-accent text-surface"
-                    : "text-accent-light hover:text-white"
+                  ? "bg-accent text-surface"
+                  : "text-accent-light hover:text-white"
                   }`}
               >
                 Autor
@@ -225,8 +225,8 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between group ${selectedCategory === cat
-                      ? "text-white border-2 border-accent-light"
-                      : "text-accent-light "
+                    ? "text-white border-2 border-accent-light"
+                    : "text-accent-light "
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -240,8 +240,8 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                   </div>
                   <span
                     className={`text-xs px-1.5 py-0.5 rounded ${selectedCategory === cat
-                        ? "bg-accent text-surface font-bold"
-                        : "text-accent-white"
+                      ? "bg-accent text-surface font-bold"
+                      : "text-accent-white"
                       }`}
                   >
                     {commitCounts[cat]}
@@ -261,8 +261,8 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                 <button
                   onClick={() => setSelectedAuthor(null)}
                   className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors ${selectedAuthor === null
-                      ? "bg-accent/20 text-accent font-bold border border-accent/50"
-                      : "text-accent-light hover:text-white"
+                    ? "bg-accent/20 text-accent font-bold border border-accent/50"
+                    : "text-accent-light hover:text-white"
                     }`}
                 >
                   Todos os autores
@@ -272,8 +272,8 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                     key={author}
                     onClick={() => setSelectedAuthor(author)}
                     className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors flex justify-between ${selectedAuthor === author
-                        ? "bg-accent/20 text-accent font-bold border border-accent/50"
-                        : "text-accent-light hover:text-white hover:bg-white/5"
+                      ? "bg-accent/20 text-accent font-bold border border-accent/50"
+                      : "text-accent-light hover:text-white hover:bg-white/5"
                       }`}
                   >
                     <span className="truncate flex-1">{author}</span>
@@ -347,7 +347,7 @@ export const CommitTimeline = ({ stats, token, provider }) => {
               {/* Header Collapsible */}
               <div
                 onClick={() => toggleGroup(group.key)}
-                className="bg-surface cursor-pointer p-2 flex items-center gap-2 hover:bg-surface-muted transition-colors select-none"
+                className={`sticky top-0 bg-surface z-10 flex items-center justify-between p-3 cursor-pointer select-none transition-colors border-b border-gray800 hover:bg-gray900`}
               >
                 <div className="p-2 text-accent">
                   {groupBy === "repo" ? (
@@ -359,7 +359,7 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                       className="w-6 h-6 rounded-full"
                     />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold">
+                    <div className="pl-8 border-l-2 border-accent/20 ml-2 space-y-3 pt-2 pb-2 justify-center text-xs font-bold">
                       {group.label.substring(0, 2).toUpperCase()}
                     </div>
                   )}
