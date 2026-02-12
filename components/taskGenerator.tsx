@@ -135,6 +135,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
   } | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
   const [viewConfig, setViewConfig] = useState(true);
+  const [filterAuthor, setFilterAuthor] = useState("");
 
   // Load Config on Mount
   useEffect(() => {
@@ -518,10 +519,24 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
     // Iteration Path Logic
     let fullIter = config.iterationPath;
-    if (config.areaPath.includes("Refatoração"))
+    if (config.areaPath.includes("Refatoração")) {
       fullIter = `SPF-SIAFIC\\Refatoração\\Refatoração - ${config.iterationPath}`;
-    else if (config.areaPath.includes("Fábrica"))
+    } else if (config.areaPath.includes("Fábrica")) {
       fullIter = `SPF-SIAFIC\\SPF Fábrica\\SPF - ${config.iterationPath}`;
+    } else if (config.areaPath.includes("SIAFIC Asp.Net Core")) {
+      // Case user prompted: SPF-SIAFIC\SIAFIC Asp.Net Core
+      fullIter = `SPF-SIAFIC\\SIAFIC Asp.Net Core\\${config.iterationPath}`;
+    } else {
+      // Fallback: Tenta construir algo genérico ou usa o que foi digitado se parecer completo
+      // Se o usuário digitou apenas o número (ex: 35), tentamos inferir
+      if (!config.iterationPath.includes("\\")) {
+        // Assumindo que area path tem formato Projeto\Time... tenta pegar o projeto
+        const parts = config.areaPath.split('\\');
+        if (parts.length > 0) {
+          fullIter = `${parts[0]}\\${parts[1] || parts[0]}\\${config.iterationPath}`;
+        }
+      }
+    }
 
     console.log("Iteration Path (Bruto):", config.iterationPath);
     console.log("Iteration Path (Calculado):", fullIter);
@@ -790,8 +805,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                     <div className="flex gap-2 mb-2">
                       <select
                         className="bg-gray900 border border-gray700 rounded p-1.5 text-[10px] text-white flex-1"
+                        value={filterAuthor}
                         onChange={(e) => {
                           const author = e.target.value;
+                          setFilterAuthor(author);
                           setLoading(true);
                           if (!selectedRepoId || !azureConfig) return;
                           const repo = selectedRepos!.find(
@@ -887,7 +904,8 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                             repo.id,
                             azureConfig.token,
                             recentCommits.length, // Skip existing
-                            20 // Take next 20
+                            20, // Take next 20
+                            filterAuthor || undefined
                           ).then((moreCommits) => {
                             // Filter Duplicates
                             const existingIds = new Set(recentCommits.map(c => c.commitId));
