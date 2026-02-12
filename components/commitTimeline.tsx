@@ -34,6 +34,11 @@ export const CommitTimeline = ({ stats, token, provider }) => {
   const [selectedCommit, setSelectedCommit] =
     useState<CategorizedCommit | null>(null);
 
+  // --- Grouping State ---
+  const [groupBy, setGroupBy] = useState<"repo" | "author">("repo");
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(10); // Initial visible groups
+
   // --- Filtering Logic for Timeline (Visual) ---
   const filteredCommits = useMemo(() => {
     let commits = [...stats.categorizedCommits];
@@ -54,40 +59,72 @@ export const CommitTimeline = ({ stats, token, provider }) => {
       commits = commits.filter((c) => c.category === selectedCategory);
     }
 
+    // Filter by Author
+    if (selectedAuthor) {
+      commits = commits.filter((c) => c.author === selectedAuthor);
+    }
+
     // Sort by date desc
     return commits.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-  }, [stats.categorizedCommits, searchTerm, selectedCategory]);
+  }, [stats.categorizedCommits, searchTerm, selectedCategory, selectedAuthor]);
 
-  // Group by Repo for Timeline
+  // Extract Unique Authors for Filter
+  const uniqueAuthors = useMemo(() => {
+    const authors: Record<string, number> = {};
+    stats.categorizedCommits.forEach((c) => {
+      if (c.author) {
+        authors[c.author] = (authors[c.author] || 0) + 1;
+      }
+    });
+    return authors;
+  }, [stats.categorizedCommits]);
+
+  // Group Logic (Dynamic based on groupBy state)
   const timelineGroups = useMemo(() => {
-    // Only group visually if searched/filtered
-    // Actually standard grouping by Repo -> Date/Month might be better?
-    // Let's stick to Repo grouping as primary
-    const groups: { repo: string; commits: CategorizedCommit[] }[] = [];
-
-    // Group map
+    const groups: {
+      key: string;
+      label: string;
+      commits: CategorizedCommit[];
+      avatar?: string;
+    }[] = [];
     const map: Record<string, CategorizedCommit[]> = {};
+
     filteredCommits.forEach((c) => {
-      if (!map[c.repo]) map[c.repo] = [];
-      map[c.repo].push(c);
+      const key = groupBy === "repo" ? c.repo : c.author || "Unknown";
+      if (!map[key]) map[key] = [];
+      map[key].push(c);
     });
 
-    Object.entries(map).forEach(([repo, commits]) => {
-      groups.push({ repo, commits });
+    Object.entries(map).forEach(([key, commits]) => {
+      groups.push({
+        key,
+        label: key,
+        commits,
+        avatar: commits[0]?.authorAvatar, // Using first commit's avatar if available
+      });
     });
 
     return groups.sort((a, b) => b.commits.length - a.commits.length);
-  }, [filteredCommits]);
+  }, [filteredCommits, groupBy]);
+
+  // Visible Groups (Pagination)
+  const visibleGroups = useMemo(() => {
+    return timelineGroups.slice(0, visibleCount);
+  }, [timelineGroups, visibleCount]);
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 10);
+  };
 
   // --- Collapsible Logic ---
-  const [collapsedRepos, setCollapsedRepos] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [collapsedGroups, setCollapsedGroups] = useState<
+    Record<string, boolean>
+  >({});
 
-  const toggleRepo = (repo: string) => {
-    setCollapsedRepos((prev) => ({ ...prev, [repo]: !prev[repo] }));
+  const toggleGroup = (key: string) => {
+    setCollapsedGroups((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   // Chart Data
@@ -142,6 +179,33 @@ export const CommitTimeline = ({ stats, token, provider }) => {
             </div>
           </div>
 
+          {/* Group By Control */}
+          <div>
+            <label className="text-xs font-bold uppercase text-accent-light/70 mb-2 block">
+              Agrupar por
+            </label>
+            <div className="flex bg-surface rounded-md p-1 border border-gray800">
+              <button
+                onClick={() => setGroupBy("repo")}
+                className={`flex-1 py-1 text-xs font-bold rounded transition-colors ${groupBy === "repo"
+                    ? "bg-accent text-surface"
+                    : "text-accent-light hover:text-white"
+                  }`}
+              >
+                Repositório
+              </button>
+              <button
+                onClick={() => setGroupBy("author")}
+                className={`flex-1 py-1 text-xs font-bold rounded transition-colors ${groupBy === "author"
+                    ? "bg-accent text-surface"
+                    : "text-accent-light hover:text-white"
+                  }`}
+              >
+                Autor
+              </button>
+            </div>
+          </div>
+
           {/* Category Filter */}
           <div className="flex-1">
             <label className="text-xs font-bold uppercase text-accent-light/70 mb-2 block">
@@ -161,8 +225,8 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between group ${selectedCategory === cat
-                    ? "text-white border-2 border-accent-light"
-                    : "text-accent-light "
+                      ? "text-white border-2 border-accent-light"
+                      : "text-accent-light "
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -176,8 +240,8 @@ export const CommitTimeline = ({ stats, token, provider }) => {
                   </div>
                   <span
                     className={`text-xs px-1.5 py-0.5 rounded ${selectedCategory === cat
-                      ? "bg-accent text-surface font-bold"
-                      : "text-accent-white"
+                        ? "bg-accent text-surface font-bold"
+                        : "text-accent-white"
                       }`}
                   >
                     {commitCounts[cat]}
@@ -186,6 +250,41 @@ export const CommitTimeline = ({ stats, token, provider }) => {
               ))}
             </div>
           </div>
+
+          {/* Author Filter */}
+          {Object.keys(uniqueAuthors).length > 0 && (
+            <div className="mt-4">
+              <label className="text-xs font-bold uppercase text-accent-light/70 mb-2 block">
+                Autores
+              </label>
+              <div className="space-y-1 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                <button
+                  onClick={() => setSelectedAuthor(null)}
+                  className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors ${selectedAuthor === null
+                      ? "bg-accent/20 text-accent font-bold border border-accent/50"
+                      : "text-accent-light hover:text-white"
+                    }`}
+                >
+                  Todos os autores
+                </button>
+                {Object.entries(uniqueAuthors).map(([author, count]) => (
+                  <button
+                    key={author}
+                    onClick={() => setSelectedAuthor(author)}
+                    className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors flex justify-between ${selectedAuthor === author
+                        ? "bg-accent/20 text-accent font-bold border border-accent/50"
+                        : "text-accent-light hover:text-white hover:bg-white/5"
+                      }`}
+                  >
+                    <span className="truncate flex-1">{author}</span>
+                    <span className="text-[10px] bg-gray800 px-1 rounded opacity-70">
+                      {count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Distribution Chart (Mini) */}
@@ -230,41 +329,54 @@ export const CommitTimeline = ({ stats, token, provider }) => {
 
       {/* Commit Feed */}
       <div className="lg:col-span-3 space-y-8">
-        {timelineGroups.map((group, groupIndex) => {
-          const isCollapsed = collapsedRepos[group.repo];
+        {visibleGroups.map((group, groupIndex) => {
+          const isCollapsed = collapsedGroups[group.key];
           // Calculate quick insight stats for this repo (e.g. 5 Feat | 2 Fix)
-          const repoCounts: any = {};
+          const groupCounts: any = {};
           group.commits.forEach(
-            (c) => (repoCounts[c.category] = (repoCounts[c.category] || 0) + 1)
+            (c) =>
+              (groupCounts[c.category] = (groupCounts[c.category] || 0) + 1)
           );
 
           return (
             <div
-              key={group.repo}
+              key={group.key}
               className=" rounded-2xl border border-gray800 shadow-xl overflow-hidden animate-fade-in"
               style={{ animationDelay: `${groupIndex * 100}ms` }}
             >
               {/* Header Collapsible */}
               <div
-                onClick={() => toggleRepo(group.repo)}
+                onClick={() => toggleGroup(group.key)}
                 className="bg-surface cursor-pointer p-2 flex items-center gap-2 hover:bg-surface-muted transition-colors select-none"
               >
                 <div className="p-2 text-accent">
-                  <FolderGit2 size={24} />
+                  {groupBy === "repo" ? (
+                    <FolderGit2 size={24} />
+                  ) : group.avatar ? (
+                    <img
+                      src={group.avatar}
+                      alt={group.label}
+                      className="w-6 h-6 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs font-bold">
+                      {group.label.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-accent-light">
-                    {group.repo}
+                    {group.label}
                   </h2>
                   <div className="flex gap-2 text-[10px] mt-0.5 ">
-                    {repoCounts[CategoryType.FEATURE] > 0 && (
+                    {groupCounts[CategoryType.FEATURE] > 0 && (
                       <span className="text-primary font-bold font-mono">
-                        {repoCounts[CategoryType.FEATURE]} feat
+                        {groupCounts[CategoryType.FEATURE]} feat
                       </span>
                     )}
-                    {repoCounts[CategoryType.FIX] > 0 && (
+                    {groupCounts[CategoryType.FIX] > 0 && (
                       <span className="text-rose-400 font-bold font-mono">
-                        {repoCounts[CategoryType.FIX]} fix
+                        {groupCounts[CategoryType.FIX]} fix
                       </span>
                     )}
                   </div>
@@ -374,6 +486,17 @@ export const CommitTimeline = ({ stats, token, provider }) => {
             </div>
           );
         })}
+        {visibleGroups.length < timelineGroups.length && (
+          <div className="text-center pt-8">
+            <button
+              onClick={handleLoadMore}
+              className="px-6 py-2 bg-accent/10 border border-accent/20 text-accent font-bold rounded-full hover:bg-accent/20 transition-all"
+            >
+              Carregar mais ({timelineGroups.length - visibleGroups.length}{" "}
+              restantes)
+            </button>
+          </div>
+        )}
         {timelineGroups.length === 0 && (
           <div className="text-center py-20 opacity-50">
             <div className="mb-4 bg-gray800 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-accent-light/70">

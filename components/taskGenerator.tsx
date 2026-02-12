@@ -723,31 +723,130 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                         ))}
                       </select>
                     </div>
-                    <div className="flex flex-col flex-1">
-                      <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 block">
-                        Repositório Selecionado
-                      </label>
+                  </div>
 
+                  {/* ADVANCED COMMIT SELECTOR */}
+                  <div className="flex flex-col gap-2 border border-gray800 rounded-md p-2 bg-gray950/50">
+                    <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 block flex justify-between items-center">
+                      <span>Selecione um Commit</span>
+                      <span className="text-[10px] normal-case bg-accent/10 px-1 rounded text-accent">
+                        {recentCommits.length} carregados
+                      </span>
+                    </label>
+
+                    {/* Commit Filters */}
+                    <div className="flex gap-2 mb-2">
                       <select
-                        className=""
-                        value={
-                          selectedCommitId ||
-                          (recentCommits.length > 0
-                            ? recentCommits[recentCommits.length - 1].commitId
-                            : "")
-                        }
-                        onChange={(e) => handleCommitSelect(e.target.value)}
-                        disabled={loading}
+                        className="bg-gray900 border border-gray700 rounded p-1.5 text-[10px] text-white flex-1"
+                        onChange={(e) => {
+                          const author = e.target.value;
+                          setLoading(true);
+                          if (!selectedRepoId || !azureConfig) return;
+                          const repo = selectedRepos!.find(
+                            (r) => r.id === selectedRepoId
+                          );
+                          if (!repo) return;
+
+                          fetchRecentCommitsForRepo(
+                            azureConfig.org,
+                            repo.project.name,
+                            repo.id,
+                            azureConfig.token,
+                            0, // Reset pagination
+                            20,
+                            author || undefined
+                          ).then((commits) => {
+                            setRecentCommits(commits);
+                            setLoading(false);
+                          });
+                        }}
                       >
-                        <option value="">Selecione um commit...</option>
-                        {recentCommits.map((c) => (
-                          <option key={c.commitId} value={c.commitId}>
-                            {c.comment.substring(0, 50)}... (
-                            {new Date(c.date).toLocaleDateString()})
+                        <option value="">Todos os Autores</option>
+                        {Array.from(
+                          new Set(recentCommits.map((c) => c.author))
+                        ).map((author: any) => (
+                          <option key={author} value={author}>
+                            {author}
                           </option>
                         ))}
                       </select>
                     </div>
+
+                    {/* Commit List */}
+                    <div className="max-h-60 overflow-y-auto pr-1 space-y-1 custom-scrollbar">
+                      {recentCommits.length === 0 ? (
+                        <div className="text-center p-4 text-xs text-gray-500">
+                          Nenhum commit encontrado.
+                        </div>
+                      ) : (
+                        recentCommits.map((c) => (
+                          <div
+                            key={c.commitId}
+                            onClick={() => handleCommitSelect(c.commitId)}
+                            className={`p-2 rounded cursor-pointer border transition-all ${selectedCommitId === c.commitId
+                                ? "bg-accent/20 border-accent text-white"
+                                : "bg-gray900 border-gray800 text-gray-400 hover:bg-gray800 hover:text-gray-300"
+                              }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <span className="text-xs font-bold truncate flex-1">
+                                {c.comment.split('\n')[0]}
+                              </span>
+                              <span className="text-[10px] font-mono opacity-70 ml-2 whitespace-nowrap">
+                                {new Date(c.date).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center mt-1">
+                              <div className="flex items-center gap-1 text-[10px]">
+                                <div className="w-4 h-4 rounded-full bg-gray700 flex items-center justify-center text-[8px] font-bold text-white overflow-hidden">
+                                  {c.authorAvatar ? (
+                                    <img
+                                      src={c.authorAvatar}
+                                      alt={c.author}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    c.author.substring(0, 2).toUpperCase()
+                                  )}
+                                </div>
+                                <span>{c.author}</span>
+                              </div>
+                              <span className="text-[10px] font-mono bg-black/30 px-1 rounded">
+                                {c.commitId.substring(0, 7)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+
+                      {/* Load More Button inside list */}
+                      <button
+                        onClick={() => {
+                          if (!selectedRepoId || !azureConfig) return;
+                          const repo = selectedRepos!.find(
+                            (r) => r.id === selectedRepoId
+                          );
+                          if (!repo) return;
+
+                          setLoading(true);
+                          fetchRecentCommitsForRepo(
+                            azureConfig.org,
+                            repo.project.name,
+                            repo.id,
+                            azureConfig.token,
+                            recentCommits.length, // Skip existing
+                            20 // Take next 20
+                          ).then((moreCommits) => {
+                            setRecentCommits([...recentCommits, ...moreCommits]);
+                            setLoading(false);
+                          });
+                        }}
+                        className="w-full py-1.5 text-xs text-center border border-dashed border-gray700 rounded text-gray-500 hover:text-accent hover:border-accent hover:bg-accent/5 transition-colors"
+                      >
+                        Carregar Mais Commits...
+                      </button>
+                    </div>
+
                     <button
                       onClick={async () => {
                         const commitToFetch =
@@ -789,12 +888,11 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                         loading ||
                         (!selectedCommitId && recentCommits.length === 0)
                       }
-                      className="
-                      cursor-pointer bg-accent self-end h-fit text-surface p-2 rounded-md disabled:opacity-50 flex gap-2 hover:bg-accent-hover items-center justify-center transition-colors"
+                      className="w-full mt-2 cursor-pointer bg-accent text-surface p-2 rounded-md disabled:opacity-50 flex gap-2 hover:bg-accent-hover items-center justify-center transition-colors font-bold text-xs uppercase tracking-wide"
                       title="Carregar Detalhes do Commit"
                     >
-                      Buscar Diffs
-                      <Download size={24} />
+                      Buscar Diffs & Detalhes
+                      <Download size={16} />
                     </button>
                   </div>
                 </div>

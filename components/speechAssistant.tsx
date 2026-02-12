@@ -144,14 +144,12 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
             const data = await fetchAzureCommitDiff(c.url, c.sha, token);
             details = `[Full Message]: ${data.description
               }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
-            details = `[Full Message]: ${data.description
-              }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
+
           } else if (c.url.includes("github")) {
             const data = await fetchGitHubCommitDiff(c.repo, c.sha, token);
             details = `[Full Message]: ${data.description
               }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
-            details = `[Full Message]: ${data.description
-              }\n[Diff Summary]:\n${data.diff.substring(0, 500)}`;
+
           }
         } catch (err) {
           console.warn(`Failed to fetch details for ${c.sha}`, err);
@@ -216,20 +214,57 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
               return (
                 <label
                   key={mode.id}
-                  className={`container-destacado block cursor-pointer transition-all group ${isActive ? mode.activeClass : ""
+                  className={`block p-3 rounded-lg border cursor-pointer transition-all group ${isActive
+                    ? `${mode.activeClass} ${mode.borderColor}`
+                    : "bg-gray950/50 border-gray800 hover:border-gray600"
                     }`}
                 >
-                  <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-          <div className="flex justify-between p-2  ">
-            <h3 className="flex items-center gap-2 font-bold text-accent-light p-2">
-              <BrainCircuit className="text-accent" size="24" /> Gerar Discurso
-            </h3>
+                  <div className="flex items-center gap-3 mb-2">
+                    <input
+                      type="radio"
+                      name="aiMode"
+                      className="hidden"
+                      checked={isActive}
+                      onChange={() => setViewMode(mode.id)}
+                    />
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isActive
+                        ? mode.borderColor
+                        : "border-gray600 group-hover:border-gray400"
+                        }`}
+                    >
+                      {isActive && (
+                        <div
+                          className={`w-2 h-2 rounded-full ${mode.indicatorColor}`}
+                        ></div>
+                      )}
+                    </div>
+                    <div className={`flex items-center gap-2 font-bold ${isActive ? "text-white" : "text-gray-400"}`}>
+                      <mode.icon size={16} className={mode.iconColor} />
+                      {mode.label}
+                    </div>
+                  </div>
+                  <p className={`text-xs ml-7 ${isActive ? "text-accent-light" : "text-gray-500"}`}>
+                    {mode.description}
+                  </p>
+                </label>
+              );
+            })}
+
+            {userContext.isHRMode && (
+              <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-xs text-purple-300 flex items-start gap-2">
+                <Users size={14} className="mt-0.5 shrink-0" />
+                Modo RH Ativo: O relatório será gerado na terceira pessoa,
+                focado em avaliação de performance.
+              </div>
+            )}
+
             <button
               onClick={generateAiSummary}
               disabled={generatingAi}
-              className={`botao-primario text-align ${generatingAi
-                ? "cursor-not-allowed"
-                : ""
+              className={`botao-primario w-full justify-center ${generatingAi
+                ? "bg-surface-muted cursor-not-allowed text-accent-light"
+                : "cursor-pointer"
                 }`}
             >
               {generatingAi ? (
@@ -245,212 +280,6 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                 </>
               )}
             </button>
-          </div>
-          {userContext.isHRMode && (
-            <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-xs text-purple-300 flex items-start gap-2">
-              <Users size={14} className="mt-0.5 shrink-0" />
-              Modo RH Ativo: O relatório será gerado na terceira pessoa,
-              focado em avaliação de performance.
-            </div>
-          )}   <div className="space-y-2">
-            <label
-              className={`container-destacado block p-2 rounded-md border cursor-pointer transition-all group ${viewMode === "daily"
-                ? "bg-yellow-600/10 border-yellow-500/50"
-                : "bg-gray950/50 border-gray800 hover:border-gray600"
-                }`}
-            >
-              <div className="absolute -top-20 right-0 w-64 h-48 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
-
-                  <div className="flex items-center gap-3 mb-2">
-                    <input
-                      type="radio"
-                      name="aiMode"
-                      className="hidden"
-                      checked={isActive}
-                      onChange={() => setViewMode(mode.id)}
-                    />
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isActive
-                        ? mode.borderColor
-                        : "border-gray600 group-hover:border-gray400"
-                        }`}
-                    >
-                      {isActive && (
-                        <div
-                          className={`w-2.5 h-2.5 rounded-full ${mode.indicatorColor}`}
-                        ></div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 font-bold text-accent-light">
-                      <mode.icon size={24} className={mode.iconColor} />
-                      {mode.label}
-                    </div>
-                  </div>
-                  <p className="text-xs text-accent-light/70 ml-8">
-                    {mode.description}
-                  </p>
-                </label>
-              );
-            })}
-              <div className="flex items-center gap-3 mb-2">
-                <input
-                  type="radio"
-                  name="aiMode"
-                  className="hidden"
-                  checked={viewMode === "daily"}
-                  onChange={() => setViewMode("daily")}
-                />
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "daily"
-                    ? "border-yellow-500"
-                    : "border-gray600 group-hover:border-gray400"
-                    }`}
-                >
-                  {viewMode === "daily" && (
-                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-yellow-50">
-                  <Coffee size={16} className="text-orange-500" /> Daily
-                  Stand-up
-                </div>
-              </div>
-              <p className="text-xs text-yellow-100/70 ml-7">
-                Foco: Ontem vs Hoje. O que foi feito e impedimentos.
-              </p>
-            </label>
-
-            <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "sprint"
-                ? "bg-purple-600/10 border-purple-500/50"
-                : "bg-gray950/50 border-gray800 hover:border-gray600"
-                }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <input
-                  type="radio"
-                  name="aiMode"
-                  className="hidden"
-                  checked={viewMode === "sprint"}
-                  onChange={() => setViewMode("sprint")}
-                />
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "sprint"
-                    ? "border-purple-500"
-                    : "border-gray600 group-hover:border-gray400"
-                    }`}
-                >
-                  {viewMode === "sprint" && (
-                    <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-yellow-50">
-                  <Zap size={16} className="text-yellow-500" /> Review da Sprint
-                </div>
-              </div>
-              <p className="text-xs text-yellow-100/70 ml-7">
-                Foco: Entregas de valor, funcionalidades e dematadas.
-              </p>
-            </label>
-
-            <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "semester"
-                ? "bg-green-600/10 border-green-500/50"
-                : "bg-gray950/50 border-gray800 hover:border-gray600"
-                }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <input
-                  type="radio"
-                  name="aiMode"
-                  className="hidden"
-                  checked={viewMode === "semester"}
-                  onChange={() => setViewMode("semester")}
-                />
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "semester"
-                    ? "border-green-500"
-                    : "border-gray600 group-hover:border-gray400"
-                    }`}
-                >
-                  {viewMode === "semester" && (
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-yellow-50">
-                  <Users size={16} className="text-green-500" /> Feedback 1:1
-                </div>
-              </div>
-              <p className="text-xs text-yellow-100/70 ml-7">
-                Foco: Evolução semestral, projetos e colaboração.
-              </p>
-            </label>
-
-            <label
-              className={`block p-3 rounded-lg border cursor-pointer transition-all group ${viewMode === "year"
-                ? "bg-yellow-600/10 border-yellow-500/50"
-                : "bg-gray950/50 border-gray800 hover:border-gray600"
-                }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <input
-                  type="radio"
-                  name="aiMode"
-                  className="hidden"
-                  checked={viewMode === "year"}
-                  onChange={() => setViewMode("year")}
-                />
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${viewMode === "year"
-                    ? "border-yellow-500"
-                    : "border-gray600 group-hover:border-gray400"
-                    }`}
-                >
-                  {viewMode === "year" && (
-                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 font-bold text-yellow-50">
-                  <CalendarCheck size={16} className="text-yellow-500" />{" "}
-                  Retrospectiva Anual
-                </div>
-              </div>
-              <p className="text-xs text-yellow-100/70 ml-7">
-                Foco: Visão holística do ano, constância e marcos.
-              </p>
-            </label>
-
-            {
-                userContext.isHRMode && (
-                  <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-xs text-purple-300 flex items-start gap-2">
-                    <Users size={14} className="mt-0.5 shrink-0" />
-                    Modo RH Ativo: O relatório será gerado na terceira pessoa,
-                    focado em avaliação de performance.
-                  </div>
-                )
-              }
-
-              <button
-                onClick={generateAiSummary}
-                disabled={generatingAi}
-                className={`botao-primario w-full justify-center ${generatingAi
-                  ? "bg-surface-muted cursor-not-allowed text-accent-light"
-                  : "cursor-pointer"
-                  }`}
-              >
-                {generatingAi ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Criando Roteiro...</span>
-                  </>
-                ) : (
-                  <>
-                    <MessageSquareText size={20} />
-                    Gerar Roteiro{" "}
-                    {userContext.isHRMode ? "de Avaliação" : "de Fala"}
-                  </>
-                )}
-              </button>
           </div>
         </div>
       </div>
@@ -471,10 +300,7 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                       ? "bg-green-500/20 text-green-400"
                       : "bg-gray800 text-accent-light/70 hover:bg-gray700 hover:text-white"
                       }`}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${copied
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-gray800 text-yellow-100/70 hover:bg-gray700 hover:text-white"
-                      }`}
+
                   >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                     {copied ? "Copiado!" : "Copiar"}
@@ -487,16 +313,14 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                 {aiSummary.split("\n").map((line, i) => (
                   <p
                     key={i}
-                    className={`mb-2 leading-relaxed ${line.startsWith("#")
-                      ? "text-lg font-bold text-white mt-4"
-                      : line.startsWith("-")
+
                     className={`mb-2 leading-relaxed ${line.startsWith("#")
                       ? "text-lg font-bold text-white mt-4"
                       : line.startsWith("-")
                         ? "ml-4"
                         : ""
                       }`}
-                      }`}
+
                   >
                     {line.replaceAll("#", "").trim()}
                   </p>
@@ -510,22 +334,22 @@ export const SpeechAssistant: React.FC<SpeechAssistantProps> = ({
                 </p>
               </div>
             </div>
-        ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-accent-light/70 p-8 text-center opacity-60">
-          <div className="w-24 h-24 bg-gray800 rounded-full flex items-center justify-center mb-6 animate-pulse">
-            <BrainCircuit size={48} className="text-accent-light/70" />
-          </div>
-          <h3 className="text-xl font-bold text-accent-light/70 mb-2">
-            Aguardando geração
-          </h3>
-          <p className="max-w-md">
-            Configure o seu contexto ao lado e clique em "Gerar Roteiro"
-            para criar um discurso personalizado para sua Daily ou Review.
-          </p>
-        </div>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-accent-light/70 p-8 text-center opacity-60">
+              <div className="w-24 h-24 bg-gray800 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                <BrainCircuit size={48} className="text-accent-light/70" />
+              </div>
+              <h3 className="text-xl font-bold text-accent-light/70 mb-2">
+                Aguardando geração
+              </h3>
+              <p className="max-w-md">
+                Configure o seu contexto ao lado e clique em "Gerar Roteiro"
+                para criar um discurso personalizado para sua Daily ou Review.
+              </p>
+            </div>
           )}
+        </div>
       </div>
-    </div>
     </div >
   );
 };

@@ -491,10 +491,17 @@ export const fetchRecentCommitsForRepo = async (
   project: string,
   repoId: string,
   token: string,
-  limit: number = 20
+  skip: number = 0,
+  take: number = 20,
+  author?: string
 ): Promise<any[]> => {
-  const url = `/azure-api/${org}/${project}/_apis/git/repositories/${repoId}/commits?$top=${limit}&api-version=7.0`;
-  const headers = { 'Authorization': 'Basic ' + btoa(':' + token) };
+  let url = `/azure-api/${org}/${project}/_apis/git/repositories/${repoId}/commits?$skip=${skip}&$top=${take}&api-version=7.0`;
+
+  if (author) {
+    url += `&searchCriteria.author=${encodeURIComponent(author)}`;
+  }
+
+  const headers = { Authorization: "Basic " + btoa(":" + token) };
 
   try {
     const res = await fetch(url, { headers });
@@ -504,7 +511,8 @@ export const fetchRecentCommitsForRepo = async (
       commitId: c.commitId,
       comment: c.comment,
       author: c.author.name,
-      date: c.author.date
+      authorAvatar: c.author.imageUrl, // Assuming Azure provides this sometimes, or we use gravatar
+      date: c.author.date,
     }));
   } catch (e) {
     console.error(`[Azure Service] Error fetching recent commits`, e);
