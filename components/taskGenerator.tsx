@@ -33,7 +33,7 @@ interface TaskGeneratorProps {
   selectedRepos?: AzureRepository[];
 }
 
-// --- INTEFACES ---
+// -- INTEFACES --
 interface Task {
   taskId: string;
   customTitle: string;
@@ -55,7 +55,7 @@ interface RepoMeta {
   repo?: string;
 }
 
-// --- KNOWLEDGE BASE ---
+// -- KNOWLEDGE BASE --
 // Mapeamento estático baseado no user request
 const KNOWLEDGE_BASE = [
   {
@@ -104,7 +104,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
   azureConfig,
   selectedRepos,
 }) => {
-  // --- STATE ---
+  // -- STATE --
   const [config, setConfig] = useState({
     assignedTo: username || "",
     iterationPath: "",
@@ -233,7 +233,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     }));
   };
 
-  // --- REPO API ---
+  // -- REPO API --
 
   const fetchGitHub = async () => {
     if (!config.ghRepo || !config.ghCommit)
@@ -286,7 +286,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     }
   };
 
-  // --- HEURISTIC ENGINE ---
+  // -- HEURISTIC ENGINE --
   const classifyComplexity = (
     filesCount: number,
     text: string,
@@ -346,6 +346,27 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     if (!descInput && !diffInput)
       return setStatusMsg({ msg: "Sem dados para processar", type: "error" });
 
+    // 1. Mandatory Fields Check
+    if (!config.areaPath) {
+      return setStatusMsg({ msg: "Erro: Area Path é obrigatório.", type: "error" });
+    }
+    if (!config.iterationPath) {
+      return setStatusMsg({ msg: "Erro: Iteration Path é obrigatório.", type: "error" });
+    }
+    if (!config.contractItem) {
+      return setStatusMsg({ msg: "Erro: Item Contrato é obrigatório.", type: "error" });
+    }
+
+    // 2. Format AssignedTo to dot.notation if it has spaces
+    // e.g., "Pedro Almeida" -> "pedro.almeida", "pedro almeida" -> "pedro.almeida"
+    if (config.assignedTo && config.assignedTo.includes(" ")) {
+      const formattedName = config.assignedTo
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ".");
+      setConfig((prev) => ({ ...prev, assignedTo: formattedName }));
+    }
+
     const newTasks: Task[] = [];
 
     // Split functionality based on diff files
@@ -403,12 +424,17 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         (kb.complexities as any)[rules.complexity] ||
         Object.values(kb.complexities)[0];
 
+      // Ensure estimateMade logic: 0.5 for BAIXA, 1 for MEDIA, 2 for ALTA
+      let defaultEstimate = 0.5;
+      if (rules.complexity === "media") defaultEstimate = 1;
+      if (rules.complexity === "alta" || rules.complexity === "unica") defaultEstimate = 2;
+
       newTasks.push({
         taskId: kb.id,
         kbIndex,
         complexity: rules.complexity,
         ustPoints: points,
-        estimateMade: 0,
+        estimateMade: defaultEstimate,
         customTitle: titleFromDomain(domain, descInput),
         coherentDescription:
           descInput || "Alterações realizadas nos arquivos do sistema.",
@@ -437,9 +463,30 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     return `${domain} - ${cleanDesc}`;
   };
 
-  // --- AI REFINEMENT ---
+  // -- AI REFINEMENT --
   const refineWithAI = async () => {
-    console.log("--- INICIANDO REFINAMENTO COM IA ---");
+    // 1. Mandatory Fields Check
+    if (!config.areaPath) {
+      return setStatusMsg({ msg: "Erro: Area Path é obrigatório.", type: "error" });
+    }
+    if (!config.iterationPath) {
+      return setStatusMsg({ msg: "Erro: Iteration Path é obrigatório.", type: "error" });
+    }
+    if (!config.contractItem) {
+      return setStatusMsg({ msg: "Erro: Item Contrato é obrigatório.", type: "error" });
+    }
+
+    // 2. Format AssignedTo to dot.notation if it has spaces
+    // e.g., "Pedro Almeida" -> "pedro.almeida", "pedro almeida" -> "pedro.almeida"
+    if (config.assignedTo && config.assignedTo.includes(" ")) {
+      const formattedName = config.assignedTo
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ".");
+      setConfig((prev) => ({ ...prev, assignedTo: formattedName }));
+    }
+
+    console.log("-- INICIANDO REFINAMENTO COM IA --");
     console.log("Input Descrição:", descInput);
     console.log("Input Diff (Tamanho):", diffInput?.length);
 
@@ -465,15 +512,17 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
           (kb.complexities as any)[rules.complexity] ||
           Object.values(kb.complexities)[0];
 
-        // Ensure estimateMade logic (points vs 0) is consistent
-        // Previously requested: estimateMade = points
+        // Ensure estimateMade logic: 0.5 for BAIXA, 1 for MEDIA, 2 for ALTA
+        let defaultEstimate = 0.5;
+        if (rules.complexity === "media") defaultEstimate = 1;
+        if (rules.complexity === "alta" || rules.complexity === "unica") defaultEstimate = 2;
 
         return {
           taskId: kb.id,
           kbIndex,
           complexity: rules.complexity,
           ustPoints: points,
-          estimateMade: 0,
+          estimateMade: defaultEstimate,
           customTitle: item.summary,
           coherentDescription: item.description,
           source: "IA Refinada (DeepSeek)",
@@ -495,13 +544,13 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       setStatusMsg({ msg: "Erro IA: " + e.message, type: "error" });
     } finally {
       setLoadingAi(false);
-      console.log("--- REFINAMENTO CONCLUÍDO ---");
+      console.log("-- REFINAMENTO CONCLUÍDO --");
     }
   };
 
-  // --- EXPORT ---
+  // -- EXPORT --
   const exportCsv = () => {
-    console.log("--- INICIANDO EXPORTAÇÃO CSV ---");
+    console.log("-- INICIANDO EXPORTAÇÃO CSV --");
     console.log("Tarefas a exportar:", tasks.length);
 
     if (tasks.length === 0) {
@@ -604,10 +653,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     link.download = `tasks_${Date.now()}.csv`;
     link.click();
 
-    console.log("--- EXPORTAÇÃO CONCLUÍDA ---");
+    console.log("-- EXPORTAÇÃO CONCLUÍDA --");
   };
 
-  // --- UI HELPERS ---
+  // -- UI HELPERS --
   const updateTask = (index: number, field: keyof Task, value: any) => {
     const newTasks = [...tasks];
     const task = newTasks[index];
@@ -621,9 +670,20 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       const firstComp = Object.keys(kb.complexities)[0] as any;
       task.complexity = firstComp;
       task.ustPoints = (kb.complexities as any)[firstComp];
+
+      // Update estimateMade based on new complexity
+      if (firstComp === "media") task.estimateMade = 1;
+      else if (firstComp === "alta" || firstComp === "unica") task.estimateMade = 2;
+      else task.estimateMade = 0.5;
+
     } else if (field === "complexity") {
       const kb = KNOWLEDGE_BASE[task.kbIndex];
       task.ustPoints = (kb.complexities as any)[value] || 0;
+
+      // Update estimateMade based on new complexity
+      if (value === "media") task.estimateMade = 1;
+      else if (value === "alta" || value === "unica") task.estimateMade = 2;
+      else task.estimateMade = 0.5;
     }
 
     setTasks(newTasks);
@@ -670,7 +730,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                 </label>
                 <input
                   type="text"
-                  className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm"
+                  className="w-full bg-gray-950 border border-gray800 rounded p-2 text-sm"
                   value={config.assignedTo}
                   onChange={(e) =>
                     setConfig({ ...config, assignedTo: e.target.value })
@@ -683,7 +743,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                 </label>
                 <input
                   type="text"
-                  className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm"
+                  className="w-full bg-gray-950 border border-gray800 rounded p-2 text-sm"
                   placeholder="ex: 35"
                   value={config.iterationPath}
                   onChange={(e) =>
@@ -698,7 +758,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                 </label>
                 <input
                   list="contract-items"
-                  className="w-full bg-gray950 border border-gray800 rounded p-2 text-sm text-accent-light"
+                  className="w-full bg-gray-950 border border-gray800 rounded p-2 text-sm text-accent-light"
                   placeholder="Selecione ou digite..."
                   value={config.contractItem}
                   onChange={(e) => setConfig({ ...config, contractItem: e.target.value })}
@@ -779,7 +839,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                         Repositório Selecionado
                       </label>
                       <select
-                        className="w-full bg-gray900 border border-gray700 rounded p-2 text-xs text-white focus:border-accent-light0 outline-none"
+                        className="w-full bg-gray-900 border border-gray700 rounded p-2 text-xs text-white focus:border-accent-light0 outline-none"
                         value={selectedRepoId}
                         onChange={(e) => setSelectedRepoId(e.target.value)}
                       >
@@ -793,7 +853,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                   </div>
 
                   {/* ADVANCED COMMIT SELECTOR */}
-                  <div className="flex flex-col gap-2 border border-gray800 rounded-md p-2 bg-gray950/50">
+                  <div className="flex flex-col gap-2 border border-gray800 rounded-md p-2 bg-gray-950/50">
                     <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 flex justify-between items-center">
                       <span>Selecione um Commit</span>
                       <span className="text-[10px] normal-case bg-accent/10 px-1 rounded text-accent">
@@ -804,7 +864,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                     {/* Commit Filters */}
                     <div className="flex gap-2 mb-2">
                       <select
-                        className="bg-gray900 border border-gray700 rounded p-1.5 text-[10px] text-white flex-1"
+                        className="bg-gray-900 border border-gray700 rounded p-1.5 text-[10px] text-white flex-1"
                         value={filterAuthor}
                         onChange={(e) => {
                           const author = e.target.value;
@@ -854,7 +914,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                             onClick={() => handleCommitSelect(c.commitId)}
                             className={`p-3 rounded-lg cursor-pointer border transition-all ${selectedCommitId === c.commitId
                               ? "bg-accent/20 border-accent text-white"
-                              : "bg-gray900 border-gray800 text-gray-300 hover:bg-gray800 hover:text-white"
+                              : "bg-gray-900 border-gray800 text-gray-300 hover:bg-gray-800 hover:text-white"
                               }`}
                           >
                             <div className="flex justify-between items-start gap-2">
@@ -984,7 +1044,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                   ? "bg-red-500/10 text-red-400"
                   : statusMsg.type === "success"
                     ? "bg-emerald-500/10 text-emerald-400"
-                    : "bg-gray800 text-accent-light/70"
+                    : "bg-gray-800 text-accent-light/70"
                   }`}
               >
                 {statusMsg.msg}
@@ -1001,7 +1061,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
             Descrição Técnica
           </label>
           <textarea
-            className="w-full h-32 bg-gray950 border border-gray800 rounded-lg p-3 text-sm focus:ring-2 focus:ring-accent-light0/50 outline-none resize-none"
+            className="w-full h-32 bg-gray-950 border border-gray800 rounded-lg p-3 text-sm focus:ring-2 focus:ring-accent-light0/50 outline-none resize-none"
             placeholder="Descreva o que foi feito..."
             value={descInput}
             onChange={(e) => setDescInput(e.target.value)}
@@ -1119,7 +1179,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
             <h3 className="font-bold text-white flex items-center gap-2">
               <CheckCircle2 className="text-emerald-500" size={18} />
               Tarefas Geradas{" "}
-              <span className="text-xs bg-gray800 px-2 py-0.5 rounded-full text-accent-light/70">
+              <span className="text-xs bg-gray-800 px-2 py-0.5 rounded-full text-accent-light/70">
                 {tasks.length}
               </span>
             </h3>
@@ -1143,10 +1203,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
             {tasks.map((task, idx) => (
               <div
                 key={idx}
-                className="bg-gray900 border border-gray800 rounded-xl p-4 shadow-sm hover:border-gray700 transition-all group"
+                className="bg-gray-900 border border-gray800 rounded-xl p-4 shadow-sm hover:border-gray700 transition-all group"
               >
                 <div className="flex items-start gap-4">
-                  <div className="mt-1 p-2 bg-gray950 rounded text-accent-light/70 font-mono text-xs border border-gray800">
+                  <div className="mt-1 p-2 bg-gray-950 rounded text-accent-light/70 font-mono text-xs border border-gray800">
                     #{task.taskId}
                   </div>
 
@@ -1171,7 +1231,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                     </div>
 
                     <textarea
-                      className="w-full bg-gray950/50 rounded p-2 text-sm text-accent-light outline-none border border-transparent focus:border-gray700 resize-none"
+                      className="w-full bg-gray-950/50 rounded p-2 text-sm text-accent-light outline-none border border-transparent focus:border-gray700 resize-none"
                       rows={2}
                       value={task.coherentDescription}
                       onChange={(e) =>
@@ -1185,7 +1245,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                           Categoria
                         </label>
                         <select
-                          className="bg-gray950 border border-gray800 rounded px-2 py-1 text-xs text-accent-light outline-none"
+                          className="bg-gray-950 border border-gray800 rounded px-2 py-1 text-xs text-accent-light outline-none"
                           value={task.kbIndex}
                           onChange={(e) =>
                             updateTask(idx, "kbIndex", parseInt(e.target.value))
@@ -1204,7 +1264,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                           Complexidade
                         </label>
                         <select
-                          className={`bg-gray950 border border-gray800 rounded px-2 py-1 text-xs outline-none font-bold ${task.complexity === "alta"
+                          className={`bg-gray-950 border border-gray800 rounded px-2 py-1 text-xs outline-none font-bold ${task.complexity === "alta"
                             ? "text-red-400"
                             : task.complexity === "media"
                               ? "text-accent"
@@ -1244,7 +1304,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
                         </label>
                         <input
                           type="number"
-                          className="w-16 bg-gray950 border border-gray800 rounded px-2 py-1 text-xs text-center text-white"
+                          className="w-16 bg-gray-950 border border-gray800 rounded px-2 py-1 text-xs text-center text-white"
                           value={task.estimateMade}
                           onChange={(e) =>
                             updateTask(
