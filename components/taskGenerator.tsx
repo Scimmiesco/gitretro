@@ -523,9 +523,9 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       fullIter = `SPF-SIAFIC\\Refatoração\\Refatoração - ${config.iterationPath}`;
     } else if (config.areaPath.includes("Fábrica")) {
       fullIter = `SPF-SIAFIC\\SPF Fábrica\\SPF - ${config.iterationPath}`;
-    } else if (config.areaPath.includes("SIAFIC Asp.Net Core")) {
+    } else if (config.areaPath.includes("SIAFIC Asp.Net Core") || config.areaPath.includes("Siafic Asp.Net Core")) {
       // Case user prompted: SPF-SIAFIC\SIAFIC Asp.Net Core
-      fullIter = `SPF-SIAFIC\\SIAFIC Asp.Net Core\\${config.iterationPath}`;
+      fullIter = `SPF-SIAFIC\\Siafic Asp.Net Core\\Siafic Asp.Net Core - ${config.iterationPath}`;
     } else {
       // Fallback: Tenta construir algo genérico ou usa o que foi digitado se parecer completo
       // Se o usuário digitou apenas o número (ex: 35), tentamos inferir
@@ -1007,10 +1007,73 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
             onChange={(e) => setDescInput(e.target.value)}
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-xs font-bold uppercase text-accent-light/70">
-            Diff / Arquivos Afetados
-          </label>
+        <div className="space-y-2 relative">
+          <div className="flex justify-between items-center">
+            <label className="text-xs font-bold uppercase text-accent-light/70">
+              Diff / Arquivos Afetados
+            </label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    setStatusMsg({ msg: "Buscando diff local...", type: "neutral" });
+                    const res = await fetch('/api/local-diff');
+                    const data = await res.json();
+                    if (data.error) {
+                      setStatusMsg({ msg: "Erro: " + data.error, type: "error" });
+                    } else if (!data.diff) {
+                      setStatusMsg({ msg: "Nenhuma alteração local não-commitada encontrada.", type: "neutral" });
+                      setDiffInput("");
+                    } else {
+                      setDiffInput(data.diff);
+                      setStatusMsg({ msg: "Diff local carregado com sucesso!", type: "success" });
+                    }
+                  } catch (e: any) {
+                    setStatusMsg({ msg: "Falha ao buscar diff local: " + e.message, type: "error" });
+                  }
+                }}
+                className="cursor-pointer bg-transparent border-none p-0 text-xs font-bold uppercase text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1"
+              >
+                <GitCommit size={12} />
+                Ler Git Local
+              </button>
+              <label className="cursor-pointer text-xs font-bold uppercase text-accent hover:text-accent-light transition-colors flex items-center gap-1">
+                <Download size={12} />
+                Carregar Arquivo Local
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".txt,.diff,.patch"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const content = event.target?.result as string;
+                      if (content) {
+                        setDiffInput(content);
+                        setStatusMsg({
+                          msg: `Arquivo ${file.name} carregado com sucesso!`,
+                          type: "success",
+                        });
+                      }
+                    };
+                    reader.onerror = () => {
+                      setStatusMsg({
+                        msg: `Erro ao ler o arquivo ${file.name}.`,
+                        type: "error",
+                      });
+                    };
+                    reader.readAsText(file);
+                    // Reseta o input para permitir carregar o mesmo arquivo novamente
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+          </div>
           <textarea
             className="w-full h-32  rounded-lg p-3 text-sm font-mono text-accent-light/70 focus:ring-2 focus:ring-accent-light0/50 outline-none resize-none"
             placeholder="Cole o diff ou lista de arquivos..."

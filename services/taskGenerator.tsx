@@ -1,4 +1,17 @@
 import { parseAzureUrl } from './azure';
+import * as Diff from 'diff';
+
+const fetchAzureBlob = async (org: string, project: string, repo: string, sha: string, auth: string) => {
+    if (!sha) return "";
+    const url = `https://dev.azure.com/${org}/${project}/_apis/git/repositories/${repo}/blobs/${sha}?api-version=7.0`;
+    try {
+        const res = await fetch(url, { headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'text/plain' } });
+        if (!res.ok) return "";
+        return await res.text();
+    } catch {
+        return "";
+    }
+};
 
 // --- GITHUB ---
 export const fetchGitHubCommitDiff = async (repo: string, commit: string, token?: string) => {
@@ -31,8 +44,39 @@ export const fetchAzureCommitDiff = async (repoUrl: string, commitSha: string, t
     if (!res.ok) throw new Error(`Erro ${res.status}: Verifique token/permissões`);
     const data = await res.json();
 
-    let diff = `[Azure Commit] ${commitSha}\nFiles:\n`;
-    if (data.changes) data.changes.forEach((c: any) => diff += `- [${c.changeType}] ${c.item.path}\n`);
+    let rootDiff = `[Azure Commit] ${commitSha}\nFiles Alterados:\n`;
+    if (data.changes) data.changes.forEach((c: any) => rootDiff += `- [${c.changeType}] ${c.item.path}\n`);
+
+    // Fetch line-by-line diffs for each file
+    let diffLines = "";
+    if (data.changes) {
+        // limit to 15 to avoid overloading browser requests
+        const changesToProcess = Math.min(data.changes.length, 15);
+        for (let i = 0; i < changesToProcess; i++) {
+            const c = data.changes[i];
+
+            // se o arquivo nao for adicionar ou deletar, e for muito grande, criar o diff pode pesar?
+            // o ai aceita melhor os codigos
+            let oldContent = "";
+            let newContent = "";
+
+            if (c.changeType !== "add" && c.item.originalObjectId) {
+                oldContent = await fetchAzureBlob(meta.org, meta.project, meta.repo, c.item.originalObjectId, auth);
+            }
+            if (c.changeType !== "delete" && c.item.objectId) {
+                newContent = await fetchAzureBlob(meta.org, meta.project, meta.repo, c.item.objectId, auth);
+            }
+
+            const filePatch = Diff.createPatch(c.item.path, oldContent, newContent);
+            diffLines += `\n\n--- Arquivo: ${c.item.path} ---\n${filePatch}\n`;
+        }
+
+        if (data.changes.length > 15) {
+            diffLines += `\n... mais ${data.changes.length - 15} arquivos omitidos por limite de carga ...\n`;
+        }
+    }
+
+    let diff = rootDiff + diffLines;
 
     // Try fetching message (commit details)
     let description = "";
