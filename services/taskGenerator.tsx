@@ -41,6 +41,9 @@ export const fetchAzureCommitDiff = async (repoUrl: string, commitSha: string, t
 
     // Fetch Changes
     const res = await fetch(changesUrl, { headers: { 'Authorization': `Basic ${auth}` } });
+    if (res.status === 401 || res.status === 403) {
+        throw new Error(`Acesso negado (${res.status}): O Token do Azure é inválido ou expirou. Verifique suas credenciais.`);
+    }
     if (!res.ok) throw new Error(`Erro ${res.status}: Verifique token/permissões`);
     const data = await res.json();
 

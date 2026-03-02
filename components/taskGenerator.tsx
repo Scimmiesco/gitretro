@@ -6,95 +6,20 @@ import {
   fetchAzureCommitDiff,
   refineTaskWithAI,
 } from "../services/taskGenerator";
-import {
-  Download,
-  Play,
-  RefreshCcw,
-  Loader2,
-  Save,
-  Trash2,
-  Search,
-  RotateCcw,
-  Wand2,
-  FileText,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  GitCommit,
-} from "lucide-react";
+import { Task, KNOWLEDGE_BASE } from "./TaskWizard/types";
+import { WizardProgress } from "./TaskWizard/WizardProgress";
+import { Step1Context } from "./TaskWizard/Step1Context";
+import { Step2Code } from "./TaskWizard/Step2Code";
+import { Step3Review } from "./TaskWizard/Step3Review";
 
 interface TaskGeneratorProps {
   provider: Provider;
   token?: string;
   username: string;
   userContext: UserContext;
-  // New Data Props
   azureConfig?: { org: string; token: string; aliases: string[] } | null;
   selectedRepos?: AzureRepository[];
 }
-
-// -- INTEFACES --
-interface Task {
-  taskId: string;
-  customTitle: string;
-  coherentDescription: string;
-  complexity: "baixa" | "media" | "alta" | "unica";
-  ustPoints: number;
-  estimateMade: number;
-  source: string;
-  kbIndex: number;
-  relatedCommitId?: string;
-  relatedCommitUrl?: string; // URL for hyperlink in description
-  relatedCommitMsg?: string;
-  contractItem?: string;
-}
-
-interface RepoMeta {
-  org?: string;
-  proj?: string;
-  repo?: string;
-}
-
-// -- KNOWLEDGE BASE --
-// Mapeamento estático baseado no user request
-const KNOWLEDGE_BASE = [
-  {
-    id: "10",
-    name: "Análise de Sistema Legado",
-    complexities: { baixa: 3, media: 9, alta: 15 },
-  },
-  {
-    id: "65",
-    name: "Supervisão técnica (Codigo/Analise/Auxilio)",
-    complexities: { unica: 10 },
-  },
-  {
-    id: "17",
-    name: "Implementação de novo Recurso (backend ou frontend)",
-    complexities: { baixa: 8, media: 24, alta: 40 },
-  },
-  {
-    id: "25",
-    name: "Execução de Testes Funcionais (Manuais)",
-    complexities: { unica: 5 },
-  },
-  { id: "38", name: "Elaboração de script", complexities: { unica: 5 } },
-  {
-    id: "14",
-    name: "Implementação de Funcionalidade Relatório",
-    complexities: { baixa: 11, media: 33, alta: 55 },
-  },
-  {
-    id: "36",
-    name: "Executar Merge em caso de conflitos",
-    complexities: { unica: 1 },
-  },
-  {
-    id: "34",
-    name: "Implantação (Deployment) de aplicação",
-    complexities: { unica: 1 },
-  },
-];
 
 const TaskGenerator: React.FC<TaskGeneratorProps> = ({
   provider,
@@ -117,7 +42,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     azToken: token || "",
   });
 
-  // Connected State
   const [selectedRepoId, setSelectedRepoId] = useState<string>("");
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const [areaPaths, setAreaPaths] = useState<string[]>([]);
@@ -137,7 +61,8 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
   const [viewConfig, setViewConfig] = useState(true);
   const [filterAuthor, setFilterAuthor] = useState("");
 
-  // Load Config on Mount
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+
   useEffect(() => {
     const load = (key: string) => localStorage.getItem("tg_" + key) || "";
     setConfig((prev) => ({
@@ -147,21 +72,16 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       areaPath: load("areaPath"),
       ghRepo: load("ghRepo"),
       azUrl: load("azUrl"),
-      // Token de API geralmente não salvamos ou salvamos com cuidado.
-      // O user snippet salvava, então manteremos a consistencia se desejado,
-      // mas aqui optei por usar o props 'token' como default se disponivel.
       contractItem: load("contractItem"),
     }));
   }, []);
 
-  // Set default repo if available
   useEffect(() => {
     if (selectedRepos && selectedRepos.length > 0 && !selectedRepoId) {
       setSelectedRepoId(selectedRepos[0].id);
     }
   }, [selectedRepos]);
 
-  // Fetch live data when Repo changes
   useEffect(() => {
     if (!selectedRepoId || !azureConfig || !selectedRepos) return;
 
@@ -171,7 +91,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     const loadData = async () => {
       setLoading(true);
       try {
-        // 1. Fetch Area Paths (Project Level)
         const paths = await fetchAreaPaths(
           azureConfig.org,
           repo.project.name,
@@ -179,7 +98,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         );
         setAreaPaths(paths);
 
-        // 2. Fetch Recent Commits
         const commits = await fetchRecentCommitsForRepo(
           azureConfig.org,
           repo.project.name,
@@ -188,7 +106,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         );
         setRecentCommits(commits);
 
-        // 3. Fetch Contract Items
         const items = await fetchWorkItemsByType(
           azureConfig.org,
           repo.project.name,
@@ -196,8 +113,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
           azureConfig.token
         );
         setContractItems(items);
-      } catch (e) {
+        setStatusMsg(null);
+      } catch (e: any) {
         console.error(e);
+        setStatusMsg({ msg: e.message || "Falha de conexão com a API do Azure.", type: "error" });
       } finally {
         setLoading(false);
       }
@@ -209,13 +128,11 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
   const saveConfig = () => {
     Object.entries(config).forEach(([k, v]) => {
       if (v && k !== "azToken" && k !== "ghCommit" && k !== "azCommit") {
-        // Avoid saving specifics
-        localStorage.setItem("tg_" + k, v);
+        localStorage.setItem("tg_" + k, v as string);
       }
     });
   };
 
-  // Auto-fill legacy config when a commit is selected from dropdown
   const handleCommitSelect = (commitId: string) => {
     setSelectedCommitId(commitId);
     if (!selectedRepos || !azureConfig) return;
@@ -223,7 +140,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     const repo = selectedRepos.find((r) => r.id === selectedRepoId);
     if (!repo) return;
 
-    // Construct URL for the legacy fetcher to work
     const cloneUrl = `https://dev.azure.com/${azureConfig.org}/${repo.project.name}/_git/${repo.name}`;
 
     setConfig((prev) => ({
@@ -232,8 +148,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       azCommit: commitId,
     }));
   };
-
-  // -- REPO API --
 
   const fetchGitHub = async () => {
     if (!config.ghRepo || !config.ghCommit)
@@ -245,7 +159,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         config.ghRepo,
         config.ghCommit,
         config.azToken
-      ); // Assuming token reuse or add ghToken prop
+      );
 
       setDiffInput(data.diff);
       setDescInput(data.description);
@@ -268,7 +182,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     setLoading(true);
     setStatusMsg({ msg: "Buscando Azure...", type: "neutral" });
     try {
-      debugger;
       const data = await fetchAzureCommitDiff(
         config.azUrl,
         config.azCommit,
@@ -286,22 +199,18 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     }
   };
 
-  // -- HEURISTIC ENGINE --
   const classifyComplexity = (
     filesCount: number,
     text: string,
     domain: string
   ): { complexity: "baixa" | "media" | "alta" | "unica"; taskId: string } => {
-    // Regras Portadas
     const textLower = text.toLowerCase();
 
-    // 1. Task ID Logic
     if (textLower.includes("merge"))
       return { taskId: "36", complexity: "unica" };
     if (textLower.includes("deploy") || textLower.includes("implantação"))
       return { taskId: "34", complexity: "unica" };
     if (textLower.includes("relatorio") || textLower.includes("relatório")) {
-      // Relatorio Rules
       let comp: "baixa" | "media" | "alta" = "baixa";
       if (filesCount > 5) comp = "media";
       if (filesCount > 10) comp = "alta";
@@ -310,13 +219,11 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     if (textLower.includes("script") || domain === "Database") {
       if (textLower.includes("criar") || textLower.includes("create"))
         return { taskId: "38", complexity: "unica" };
-      // analise
       return { taskId: "10", complexity: "baixa" };
     }
     if (domain === "Test") return { taskId: "25", complexity: "unica" };
     if (domain === "Meeting") return { taskId: "65", complexity: "unica" };
 
-    // Default: Implementação (17)
     let score = 1;
     if (filesCount > 10) score = 3;
     else if (filesCount >= 4) score = 2;
@@ -343,10 +250,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
 
   const processHeuristic = () => {
     saveConfig();
-    if (!descInput && !diffInput)
-      return setStatusMsg({ msg: "Sem dados para processar", type: "error" });
-
-    // 1. Mandatory Fields Check
     if (!config.areaPath) {
       return setStatusMsg({ msg: "Erro: Area Path é obrigatório.", type: "error" });
     }
@@ -356,9 +259,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     if (!config.contractItem) {
       return setStatusMsg({ msg: "Erro: Item Contrato é obrigatório.", type: "error" });
     }
+    if (!diffInput && !config.azCommit) {
+      return setStatusMsg({ msg: "Erro: Forneça um Diff ou selecione um Commit.", type: "error" });
+    }
 
-    // 2. Format AssignedTo to dot.notation if it has spaces
-    // e.g., "Pedro Almeida" -> "pedro.almeida", "pedro almeida" -> "pedro.almeida"
     if (config.assignedTo && config.assignedTo.includes(" ")) {
       const formattedName = config.assignedTo
         .toLowerCase()
@@ -368,13 +272,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     }
 
     const newTasks: Task[] = [];
-
-    // Split functionality based on diff files
     const files = diffInput.match(
       /[-*] (\[.*?\])?\s?([a-zA-Z0-9_/\\.-]+)/g
     ) || [""];
 
-    // Group by Domain
     const domains: Record<string, number> = {
       Frontend: 0,
       Backend: 0,
@@ -408,23 +309,18 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       ([_, count]) => count > 0
     );
 
-    // If no file heuristic (manual entry usually), treat as single generic
     if (activeDomains.length === 0) activeDomains.push(["Geral", 1]);
 
     activeDomains.forEach(([domain, count]) => {
       const rules = classifyComplexity(count, descInput, domain);
-
-      // Find KB
       let kbIndex = KNOWLEDGE_BASE.findIndex((k) => k.id === rules.taskId);
-      if (kbIndex === -1) kbIndex = 2; // Default to Impl
+      if (kbIndex === -1) kbIndex = 2;
 
       const kb = KNOWLEDGE_BASE[kbIndex];
-      // Safe access complexity points
       const points =
         (kb.complexities as any)[rules.complexity] ||
         Object.values(kb.complexities)[0];
 
-      // Ensure estimateMade logic: 0.5 for BAIXA, 1 for MEDIA, 2 for ALTA
       let defaultEstimate = 0.5;
       if (rules.complexity === "media") defaultEstimate = 1;
       if (rules.complexity === "alta" || rules.complexity === "unica") defaultEstimate = 2;
@@ -432,7 +328,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       newTasks.push({
         taskId: kb.id,
         kbIndex,
-        complexity: rules.complexity,
+        complexity: rules.complexity as any,
         ustPoints: points,
         estimateMade: defaultEstimate,
         customTitle: titleFromDomain(domain, descInput),
@@ -454,7 +350,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       msg: `Gerado: ${newTasks.length} tarefas via regras.`,
       type: "success",
     });
-    setViewConfig(false); // Collapse config to show results
+    setViewConfig(false);
   };
 
   const titleFromDomain = (domain: string, desc: string): string => {
@@ -463,9 +359,7 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     return `${domain} - ${cleanDesc}`;
   };
 
-  // -- AI REFINEMENT --
   const refineWithAI = async () => {
-    // 1. Mandatory Fields Check
     if (!config.areaPath) {
       return setStatusMsg({ msg: "Erro: Area Path é obrigatório.", type: "error" });
     }
@@ -475,9 +369,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     if (!config.contractItem) {
       return setStatusMsg({ msg: "Erro: Item Contrato é obrigatório.", type: "error" });
     }
+    if (!diffInput && !config.azCommit) {
+      return setStatusMsg({ msg: "Erro: Forneça um Diff ou selecione um Commit.", type: "error" });
+    }
 
-    // 2. Format AssignedTo to dot.notation if it has spaces
-    // e.g., "Pedro Almeida" -> "pedro.almeida", "pedro almeida" -> "pedro.almeida"
     if (config.assignedTo && config.assignedTo.includes(" ")) {
       const formattedName = config.assignedTo
         .toLowerCase()
@@ -486,20 +381,10 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       setConfig((prev) => ({ ...prev, assignedTo: formattedName }));
     }
 
-    console.log("-- INICIANDO REFINAMENTO COM IA --");
-    console.log("Input Descrição:", descInput);
-    console.log("Input Diff (Tamanho):", diffInput?.length);
-
     setLoadingAi(true);
     try {
       const aiItems = await refineTaskWithAI(descInput, diffInput);
-      console.log("IA Retornou Items:", aiItems);
-
-      // Convert AI items to Heuristic Tasks
       const convertedTasks = aiItems.map((item: any) => {
-        console.log("Processando Item IA:", item.summary);
-
-        // Re-run classifier on AI output
         const rules = classifyComplexity(
           1,
           item.summary + " " + item.description,
@@ -512,7 +397,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
           (kb.complexities as any)[rules.complexity] ||
           Object.values(kb.complexities)[0];
 
-        // Ensure estimateMade logic: 0.5 for BAIXA, 1 for MEDIA, 2 for ALTA
         let defaultEstimate = 0.5;
         if (rules.complexity === "media") defaultEstimate = 1;
         if (rules.complexity === "alta" || rules.complexity === "unica") defaultEstimate = 2;
@@ -536,50 +420,31 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
         };
       });
 
-      console.log("Tarefas Convertidas:", convertedTasks);
       setTasks(convertedTasks);
       setStatusMsg({ msg: "Tarefas refinadas com IA!", type: "success" });
     } catch (e: any) {
-      console.error("Erro no Refinamento IA:", e);
       setStatusMsg({ msg: "Erro IA: " + e.message, type: "error" });
     } finally {
       setLoadingAi(false);
-      console.log("-- REFINAMENTO CONCLUÍDO --");
     }
   };
 
-  // -- EXPORT --
   const exportCsv = () => {
-    console.log("-- INICIANDO EXPORTAÇÃO CSV --");
-    console.log("Tarefas a exportar:", tasks.length);
+    if (tasks.length === 0) return;
 
-    if (tasks.length === 0) {
-      console.warn("Nenhuma tarefa para exportar.");
-      return;
-    }
-
-    // Header do CSV - Verifique se estes nomes batem com o Azure DevOps Import
     let csv =
       "ID,Work Item Type,Title,Assigned To,State,ID SPF,Effort,Estimate Made,Item Contrato,UST,Activity,Complexidade,Area Path,Iteration Path,Description\n";
 
-    // Area Path Logic
     const area = config.areaPath || "Area\\Path";
-    console.log("Area Path Configurado:", area);
-
-    // Iteration Path Logic
     let fullIter = config.iterationPath;
     if (config.areaPath.includes("Refatoração")) {
       fullIter = `SPF-SIAFIC\\Refatoração\\Refatoração - ${config.iterationPath}`;
     } else if (config.areaPath.includes("Fábrica")) {
       fullIter = `SPF-SIAFIC\\SPF Fábrica\\SPF - ${config.iterationPath}`;
     } else if (config.areaPath.includes("SIAFIC Asp.Net Core") || config.areaPath.includes("Siafic Asp.Net Core")) {
-      // Case user prompted: SPF-SIAFIC\SIAFIC Asp.Net Core
       fullIter = `SPF-SIAFIC\\Siafic Asp.Net Core\\Siafic Asp.Net Core - ${config.iterationPath}`;
     } else {
-      // Fallback: Tenta construir algo genérico ou usa o que foi digitado se parecer completo
-      // Se o usuário digitou apenas o número (ex: 35), tentamos inferir
       if (!config.iterationPath.includes("\\")) {
-        // Assumindo que area path tem formato Projeto\Time... tenta pegar o projeto
         const parts = config.areaPath.split('\\');
         if (parts.length > 0) {
           fullIter = `${parts[0]}\\${parts[1] || parts[0]}\\${config.iterationPath}`;
@@ -587,15 +452,8 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       }
     }
 
-    console.log("Iteration Path (Bruto):", config.iterationPath);
-    console.log("Iteration Path (Calculado):", fullIter);
-
     tasks.forEach((t, index) => {
-      console.log(`Processando Tarefa #${index + 1}:`, t.customTitle);
-
-      // Tratamento de aspas para CSV (escapar aspas duplas com outra aspa dupla)
       const tit = `"${t.customTitle.replace(/"/g, '""')}"`;
-
       let descContent = t.coherentDescription;
       if (t.contractItem) {
         descContent += `\n\nItem Contrato: ${t.contractItem}`;
@@ -603,40 +461,24 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       if (t.relatedCommitUrl) {
         descContent += `<a href="${t.relatedCommitUrl}" target="_blank">\n\nCommit Original: ${t.relatedCommitUrl}</a>`;
       }
-
       const desc = `"${descContent.replace(/"/g, '""')}"`;
 
-      // Mapeamento de Complexidade para maiúsculas ou termo específico
       let comp =
         t.complexity === "unica" ? "ÚNICA" : t.complexity.toUpperCase();
 
-      // Debug dos campos críticos
-      console.log({
-        Title: t.customTitle,
-        AssignedTo: config.assignedTo,
-        SPF_ID: t.taskId,
-        Effort: t.estimateMade ?? 0,
-        EstimateMade: t.estimateMade ?? 0,
-        ItemContrato: t.contractItem,
-        UST: t.ustPoints,
-        Complexity: comp,
-        Area: area,
-        Iteration: fullIter
-      });
-
       const row = [
-        "", // ID (Azure gera automático na importação, deixar vazio)
-        "Task", // Work Item Type
+        "",
+        "Task",
         tit,
         `"${config.assignedTo}"`,
         "To Do",
-        `"${t.taskId}"`, // ID SPF (Campo Customizado?)
-        `"${t.estimateMade ?? 0}"`, // Effort / Original Estimate
-        `"${t.estimateMade ?? 0}"`, // Estimate Made
-        `"${t.contractItem}"`, // Item Contrato
-        `"${t.ustPoints}"`, // UST Points (Campo Customizado?)
-        "Development", // Activity
-        `"${comp}"`, // Complexidade
+        `"${t.taskId}"`,
+        `"${t.estimateMade ?? 0}"`,
+        `"${t.estimateMade ?? 0}"`,
+        `"${t.contractItem}"`,
+        `"${t.ustPoints}"`,
+        "Development",
+        `"${comp}"`,
         `"${area}"`,
         `"${fullIter}"`,
         desc,
@@ -645,33 +487,25 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       csv += row + "\n";
     });
 
-    console.log("CSV Gerado com sucesso. Iniciando download...");
-
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = `tasks_${Date.now()}.csv`;
     link.click();
-
-    console.log("-- EXPORTAÇÃO CONCLUÍDA --");
   };
 
-  // -- UI HELPERS --
   const updateTask = (index: number, field: keyof Task, value: any) => {
     const newTasks = [...tasks];
     const task = newTasks[index];
     (task as any)[field] = value;
 
-    // Update derivatives
     if (field === "kbIndex") {
       const kb = KNOWLEDGE_BASE[value];
       task.taskId = kb.id;
-      // Reset complexity to first available
       const firstComp = Object.keys(kb.complexities)[0] as any;
       task.complexity = firstComp;
       task.ustPoints = (kb.complexities as any)[firstComp];
 
-      // Update estimateMade based on new complexity
       if (firstComp === "media") task.estimateMade = 1;
       else if (firstComp === "alta" || firstComp === "unica") task.estimateMade = 2;
       else task.estimateMade = 0.5;
@@ -680,7 +514,6 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
       const kb = KNOWLEDGE_BASE[task.kbIndex];
       task.ustPoints = (kb.complexities as any)[value] || 0;
 
-      // Update estimateMade based on new complexity
       if (value === "media") task.estimateMade = 1;
       else if (value === "alta" || value === "unica") task.estimateMade = 2;
       else task.estimateMade = 0.5;
@@ -702,633 +535,96 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
     return "bg-accent-light0/20 text-accent border-accent-light0/30";
   };
 
+  const handleNextStep1 = () => {
+    if (!config.areaPath || !config.iterationPath || !config.contractItem) {
+      setStatusMsg({ msg: "Preencha Área, Iteration Path e Item Contrato para prosseguir.", type: "error" });
+      return;
+    }
+    setStatusMsg(null);
+    setCurrentStep(2);
+  };
+
+  const handleNextStep2 = () => {
+    if (!diffInput && !config.azCommit) {
+      setStatusMsg({ msg: "Forneça um Diff ou selecione um Commit para prosseguir.", type: "error" });
+      return;
+    }
+    setStatusMsg(null);
+    setCurrentStep(3);
+  };
+
   return (
     <div className="space-y-6">
-      {/* CONFIGURATION PANEL */}
-      <div className="border-2 border-accent-light rounded-xl overflow-hidden shadow-sm">
-        <button
-          onClick={() => setViewConfig(!viewConfig)}
-          className="w-full flex items-center justify-between p-2 bg-surface hover:bg-surface-muted transition-colors cursor-pointer"
+      <WizardProgress currentStep={currentStep} />
+
+      {statusMsg && (
+        <div
+          className={`p-3 rounded-lg text-sm font-bold border ${statusMsg.type === "error"
+            ? "bg-red-500/10 text-red-400 border-red-500/20"
+            : statusMsg.type === "success"
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              : "bg-gray-800 text-accent-light/70 border-gray700"
+            }`}
         >
-          <h3 className="font-bold text-accent-light flex items-center gap-2">
-            Configuração & Origem
-          </h3>
-          {viewConfig ? (
-            <ChevronUp className="text-accent-light" size={24} />
-          ) : (
-            <ChevronDown className="text-accent-light" size={24} />
-          )}
-        </button>
-
-        {viewConfig && (
-          <div className="p-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
-            {/* 1. Global Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-              <div>
-                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
-                  Assigned To
-                </label>
-                <input
-                  type="text"
-                  className="w-full bg-gray-950 border border-gray800 rounded p-2 text-sm"
-                  value={config.assignedTo}
-                  onChange={(e) =>
-                    setConfig({ ...config, assignedTo: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
-                  Iteration Path
-                </label>
-                <input
-                  type="text"
-                  className="w-full bg-gray-950 border border-gray800 rounded p-2 text-sm"
-                  placeholder="ex: 35"
-                  value={config.iterationPath}
-                  onChange={(e) =>
-                    setConfig({ ...config, iterationPath: e.target.value })
-                  }
-                />
-              </div>
-              {/* CONTRACT ITEM */}
-              <div className="">
-                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
-                  Item Contrato
-                </label>
-                <input
-                  list="contract-items"
-                  className="w-full bg-gray-950 border border-gray800 rounded p-2 text-sm text-accent-light"
-                  placeholder="Selecione ou digite..."
-                  value={config.contractItem}
-                  onChange={(e) => setConfig({ ...config, contractItem: e.target.value })}
-                />
-                <datalist id="contract-items">
-                  {contractItems.map(item => (
-                    <option key={item.id} value={`${item.id} - ${item.title}`} />
-                  ))}
-                </datalist>
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
-                  Area Path
-                </label>
-                {azureConfig && selectedRepos ? (
-                  <select
-                    className="w-full bg-gray-950 border border-gray-800 rounded p-2 text-sm text-accent-light outline-none"
-                    value={config.areaPath}
-                    onChange={(e) =>
-                      setConfig({ ...config, areaPath: e.target.value })
-                    }
-                  >
-                    <option value="">Selecione Area Path...</option>
-                    {areaPaths.map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <select
-                    className="w-full bg-gray-50 border border-gray800 rounded p-2 text-sm"
-                    value={config.areaPath}
-                    onChange={(e) =>
-                      setConfig({ ...config, areaPath: e.target.value })
-                    }
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="SPF-SIAFIC\Refatoração">Refatoração</option>
-                    <option value="SPF-SIAFIC\SPF Fábrica">Fábrica</option>
-                  </select>
-                )}
-              </div>
-            </div>
-
-            {/* 2. Source Selection */}
-            <div className=" p-2 rounded-md">
-              {azureConfig && selectedRepos && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center gap-2 text-accent font-bold text-sm">
-                    <div className="flex justify-end align-center w-full">
-                      <button
-                        onClick={() => setReloadTrigger((prev) => prev + 1)}
-                        className="flex gap-2 items-center p-2 bg-surface self-end rounded-lg hover:text-accent-light transition-colors cursor-pointer"
-                        title="Atualizar commits"
-                        disabled={
-                          loading ||
-                          (!selectedCommitId && recentCommits.length === 0)
-                        }
-                      >
-                        {loading ? (
-                          <div className="flex gap-2 min-w-fit flex-nowrap text-center items-center">
-                            Atualizando commits
-                            <Loader2 size={16} className="animate-spin" />
-                          </div>
-                        ) : (
-                          <div className="flex gap-2 min-w-fit flex-nowrap text-center items-center">
-                            Atualizar commits <RefreshCcw size={16} />
-                          </div>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex w-full gap-2">
-                    <div className="flex flex-col flex-1">
-                      <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 block">
-                        Repositório Selecionado
-                      </label>
-                      <select
-                        className="w-full bg-gray-900 border border-gray700 rounded p-2 text-xs text-white focus:border-accent-light0 outline-none"
-                        value={selectedRepoId}
-                        onChange={(e) => setSelectedRepoId(e.target.value)}
-                      >
-                        {selectedRepos.map((r) => (
-                          <option key={r.id} value={r.id}>
-                            {r.name} ({r.project.name})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* ADVANCED COMMIT SELECTOR */}
-                  <div className="flex flex-col gap-2 border border-gray800 rounded-md p-2 bg-gray-950/50">
-                    <label className="text-[10px] font-bold uppercase text-accent-light/70 mb-1 flex justify-between items-center">
-                      <span>Selecione um Commit</span>
-                      <span className="text-[10px] normal-case bg-accent/10 px-1 rounded text-accent">
-                        {recentCommits.length} carregados
-                      </span>
-                    </label>
-
-                    {/* Commit Filters */}
-                    <div className="flex gap-2 mb-2">
-                      <select
-                        className="bg-gray-900 border border-gray700 rounded p-1.5 text-[10px] text-white flex-1"
-                        value={filterAuthor}
-                        onChange={(e) => {
-                          const author = e.target.value;
-                          setFilterAuthor(author);
-                          setLoading(true);
-                          if (!selectedRepoId || !azureConfig) return;
-                          const repo = selectedRepos!.find(
-                            (r) => r.id === selectedRepoId
-                          );
-                          if (!repo) return;
-
-                          fetchRecentCommitsForRepo(
-                            azureConfig.org,
-                            repo.project.name,
-                            repo.id,
-                            azureConfig.token,
-                            0, // Reset pagination
-                            20,
-                            author || undefined
-                          ).then((commits) => {
-                            setRecentCommits(commits);
-                            setLoading(false);
-                          });
-                        }}
-                      >
-                        <option value="">Todos os Autores</option>
-                        {Array.from(
-                          new Set(recentCommits.map((c) => c.author))
-                        ).map((author: any) => (
-                          <option key={author} value={author}>
-                            {author}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Commit List */}
-                    <div className="max-h-80 overflow-y-auto pr-1 space-y-2 custom-scrollbar">
-                      {recentCommits.length === 0 ? (
-                        <div className="text-center p-4 text-sm text-gray-500">
-                          Nenhum commit encontrado.
-                        </div>
-                      ) : (
-                        recentCommits.map((c) => (
-                          <div
-                            key={c.commitId}
-                            onClick={() => handleCommitSelect(c.commitId)}
-                            className={`p-3 rounded-lg cursor-pointer border transition-all ${selectedCommitId === c.commitId
-                              ? "bg-accent/20 border-accent text-white"
-                              : "bg-gray-900 border-gray800 text-gray-300 hover:bg-gray-800 hover:text-white"
-                              }`}
-                          >
-                            <div className="flex justify-between items-start gap-2">
-                              <span className="text-md font-bold leading-tight flex-1">
-                                {c.comment.split('\n')[0]}
-                              </span>
-                              <span className="text-[12px] uppercase font-mono text-white whitespace-nowrap">
-                                {new Date(c.date).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center mt-2">
-                              <div className="flex items-center gap-2 text-xs text-gray-400">
-                                <div className="w-6 h-6 rounded-full bg-surface flex items-center justify-center text-[12px] font-bold text-white overflow-hidden shadow-sm">
-                                  {c.authorAvatar ? (
-                                    <img
-                                      src={c.authorAvatar}
-                                      alt={c.author}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    c.author.substring(0, 2).toUpperCase()
-                                  )}
-                                </div>
-                                <span className="font-medium truncate max-w-[120px]">{c.author}</span>
-                              </div>
-                              <span className="text-xs font-mono text-gray-500 bg-black/40 px-1.5 py-0.5 rounded-md">
-                                {c.commitId.substring(0, 7)}
-                              </span>
-                            </div>
-                          </div>
-                        ))
-                      )}
-
-                      {/* Load More Button inside list */}
-                      <button
-                        onClick={() => {
-                          if (!selectedRepoId || !azureConfig) return;
-                          const repo = selectedRepos!.find(
-                            (r) => r.id === selectedRepoId
-                          );
-                          if (!repo) return;
-
-                          setLoading(true);
-                          fetchRecentCommitsForRepo(
-                            azureConfig.org,
-                            repo.project.name,
-                            repo.id,
-                            azureConfig.token,
-                            recentCommits.length, // Skip existing
-                            20, // Take next 20
-                            filterAuthor || undefined
-                          ).then((moreCommits) => {
-                            // Filter Duplicates
-                            const existingIds = new Set(recentCommits.map(c => c.commitId));
-                            const uniqueNew = moreCommits.filter(c => !existingIds.has(c.commitId));
-
-                            if (uniqueNew.length === 0) {
-                              console.log("Nenhum commit novo encontrado ou todos duplicados.");
-                            }
-
-                            setRecentCommits([...recentCommits, ...uniqueNew]);
-                            setLoading(false);
-                          });
-                        }}
-                        className="w-full py-1.5 text-xs text-center border border-dashed border-gray700 rounded text-gray-500 hover:text-accent hover:border-accent hover:bg-accent/5 transition-colors"
-                      >
-                        Carregar Mais Commits...
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={async () => {
-                        const commitToFetch =
-                          selectedCommitId ||
-                          (recentCommits.length > 0
-                            ? recentCommits[recentCommits.length - 1].commitId
-                            : "");
-                        if (!commitToFetch || !selectedRepoId || !azureConfig)
-                          return;
-
-                        setLoading(true);
-                        try {
-                          const repo = selectedRepos!.find(
-                            (r) => r.id === selectedRepoId
-                          );
-                          if (!repo) return;
-                          const cloneUrl = `https://dev.azure.com/${azureConfig.org}/${repo.project.name}/_git/${repo.name}`;
-                          const data = await fetchAzureCommitDiff(
-                            cloneUrl,
-                            commitToFetch,
-                            azureConfig.token
-                          );
-                          setDiffInput(data.diff);
-                          setDescInput(data.description);
-                          setStatusMsg({
-                            msg: "Dados do commit carregados!",
-                            type: "success",
-                          });
-                        } catch (e: any) {
-                          setStatusMsg({
-                            msg: "Erro ao carregar commit: " + e.message,
-                            type: "error",
-                          });
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
-                      disabled={
-                        loading ||
-                        (!selectedCommitId && recentCommits.length === 0)
-                      }
-                      className="w-full mt-2 cursor-pointer bg-accent text-surface p-2 rounded-md disabled:opacity-50 flex gap-2 hover:bg-accent-hover items-center justify-center transition-colors font-bold text-xs uppercase tracking-wide"
-                      title="Carregar Detalhes do Commit"
-                    >
-                      Buscar Diffs & Detalhes
-                      <Download size={16} />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Status Message */}
-            {statusMsg && (
-              <div
-                className={`p-3 rounded text-xs font-bold flex items-center gap-2 ${statusMsg.type === "error"
-                  ? "bg-red-500/10 text-red-400"
-                  : statusMsg.type === "success"
-                    ? "bg-emerald-500/10 text-emerald-400"
-                    : "bg-gray-800 text-accent-light/70"
-                  }`}
-              >
-                {statusMsg.msg}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* INPUT AREA */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-xs font-bold uppercase text-accent-light/70">
-            Descrição Técnica
-          </label>
-          <textarea
-            className="w-full h-32 bg-gray-950 border border-gray800 rounded-lg p-3 text-sm focus:ring-2 focus:ring-accent-light0/50 outline-none resize-none"
-            placeholder="Descreva o que foi feito..."
-            value={descInput}
-            onChange={(e) => setDescInput(e.target.value)}
-          />
+          {statusMsg.msg}
         </div>
-        <div className="space-y-2 relative">
-          <div className="flex justify-between items-center">
-            <label className="text-xs font-bold uppercase text-accent-light/70">
-              Diff / Arquivos Afetados
-            </label>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    setStatusMsg({ msg: "Buscando diff local...", type: "neutral" });
-                    const res = await fetch('/api/local-diff');
-                    const data = await res.json();
-                    if (data.error) {
-                      setStatusMsg({ msg: "Erro: " + data.error, type: "error" });
-                    } else if (!data.diff) {
-                      setStatusMsg({ msg: "Nenhuma alteração local não-commitada encontrada.", type: "neutral" });
-                      setDiffInput("");
-                    } else {
-                      setDiffInput(data.diff);
-                      setStatusMsg({ msg: "Diff local carregado com sucesso!", type: "success" });
-                    }
-                  } catch (e: any) {
-                    setStatusMsg({ msg: "Falha ao buscar diff local: " + e.message, type: "error" });
-                  }
-                }}
-                className="cursor-pointer bg-transparent border-none p-0 text-xs font-bold uppercase text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1"
-              >
-                <GitCommit size={12} />
-                Ler Git Local
-              </button>
-              <label className="cursor-pointer text-xs font-bold uppercase text-accent hover:text-accent-light transition-colors flex items-center gap-1">
-                <Download size={12} />
-                Carregar Arquivo Local
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".txt,.diff,.patch"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
+      )}
 
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                      const content = event.target?.result as string;
-                      if (content) {
-                        setDiffInput(content);
-                        setStatusMsg({
-                          msg: `Arquivo ${file.name} carregado com sucesso!`,
-                          type: "success",
-                        });
-                      }
-                    };
-                    reader.onerror = () => {
-                      setStatusMsg({
-                        msg: `Erro ao ler o arquivo ${file.name}.`,
-                        type: "error",
-                      });
-                    };
-                    reader.readAsText(file);
-                    // Reseta o input para permitir carregar o mesmo arquivo novamente
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-            </div>
-          </div>
-          <textarea
-            className="w-full h-32  rounded-lg p-3 text-sm font-mono text-accent-light/70 focus:ring-2 focus:ring-accent-light0/50 outline-none resize-none"
-            placeholder="Cole o diff ou lista de arquivos..."
-            value={diffInput}
-            onChange={(e) => setDiffInput(e.target.value)}
-          />
-        </div>
-      </div>
+      {currentStep === 1 && (
+        <Step1Context
+          config={config}
+          setConfig={setConfig}
+          descInput={descInput}
+          setDescInput={setDescInput}
+          areaPaths={areaPaths}
+          contractItems={contractItems}
+          onNext={handleNextStep1}
+        />
+      )}
 
-      {/* ACTION BAR */}
-      <div className="flex items-center gap-4">
-        {/* <button
-          onClick={processHeuristic}
-          className="flex-1 py-3 bg-accent hover:bg-accent-light text-surface rounded-xl font-bold transition-all shadow-lg shadow-accent/20 active:scale-95 flex items-center justify-center gap-2"
-        >
-          <Play size={18} /> Gerar Tarefas (Rápido)
-        </button> */}
-        <button
-          onClick={refineWithAI}
-          disabled={loadingAi}
-          className="flex-1 px-6 py-2 
-          bg-accent hover:bg-accent-light 
-          text-surface rounded-xl
-          font-bold transition-colors
-          active:scale-95 
-          cursor-pointer
-          flex items-center
-          justify-center gap-2 disabled:opacity-50"
-        >
-          {loadingAi ? (
-            <Loader2 size={18} className="animate-spin" />
-          ) : (
-            <Wand2 size={18} />
-          )}
-          Gerar tarefas
-        </button>
-      </div>
+      {currentStep === 2 && (
+        <Step2Code
+          config={config}
+          setConfig={setConfig}
+          diffInput={diffInput}
+          setDiffInput={setDiffInput}
+          azureConfig={azureConfig}
+          selectedRepos={selectedRepos || []}
+          selectedRepoId={selectedRepoId}
+          setSelectedRepoId={setSelectedRepoId}
+          filterAuthor={filterAuthor}
+          setFilterAuthor={setFilterAuthor}
+          recentCommits={recentCommits}
+          setRecentCommits={setRecentCommits}
+          selectedCommitId={selectedCommitId}
+          handleCommitSelect={handleCommitSelect}
+          loading={loading}
+          setLoading={setLoading}
+          fetchAzure={fetchAzure}
+          setStatusMsg={setStatusMsg}
+          onBack={() => setCurrentStep(1)}
+          onNext={handleNextStep2}
+          processHeuristic={processHeuristic}
+        />
+      )}
 
-      {/* RESULTS AREA */}
-      {tasks.length > 0 && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center justify-between border-b border-gray800 pb-2 mb-4">
-            <h3 className="font-bold text-white flex items-center gap-2">
-              <CheckCircle2 className="text-emerald-500" size={18} />
-              Tarefas Geradas{" "}
-              <span className="text-xs bg-gray-800 px-2 py-0.5 rounded-full text-accent-light/70">
-                {tasks.length}
-              </span>
-            </h3>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setTasks([])}
-                className="p-2 text-accent-light/70 hover:text-red-400 transition-colors"
-              >
-                <Trash2 size={16} />
-              </button>
-              <button
-                onClick={exportCsv}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold shadow-lg shadow-emerald-900/20 transition-all"
-              >
-                <FileText size={16} /> Exportar CSV
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {tasks.map((task, idx) => (
-              <div
-                key={idx}
-                className="bg-gray-900 border border-gray800 rounded-xl p-4 shadow-sm hover:border-gray700 transition-all group"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="mt-1 p-2 bg-gray-950 rounded text-accent-light/70 font-mono text-xs border border-gray800">
-                    #{task.taskId}
-                  </div>
-
-                  <div className="flex-1 space-y-3">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        className="flex-1 bg-transparent border-b border-transparent hover:border-gray700 focus:border-accent-light0 outline-none text-white font-semibold placeholder-gray600 transition-colors"
-                        value={task.customTitle}
-                        onChange={(e) =>
-                          updateTask(idx, "customTitle", e.target.value)
-                        }
-                      />
-                      <span className="text-[10px] uppercase font-bold text-accent-light/70 tracking-wider self-center">
-                        {task.source}
-                      </span>
-                      {task.relatedCommitId && (
-                        <span className="text-[10px] items-center flex gap-1 font-mono text-emerald-400 bg-emerald-400/10 px-1 rounded border border-emerald-400/20" title={task.relatedCommitId}>
-                          <GitCommit size={10} /> {task.relatedCommitId.substring(0, 7)}
-                        </span>
-                      )}
-                    </div>
-
-                    <textarea
-                      className="w-full bg-gray-950/50 rounded p-2 text-sm text-accent-light outline-none border border-transparent focus:border-gray700 resize-none"
-                      rows={2}
-                      value={task.coherentDescription}
-                      onChange={(e) =>
-                        updateTask(idx, "coherentDescription", e.target.value)
-                      }
-                    />
-
-                    <div className="flex flex-wrap items-center gap-4">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-accent-light/70">
-                          Categoria
-                        </label>
-                        <select
-                          className="bg-gray-950 border border-gray800 rounded px-2 py-1 text-xs text-accent-light outline-none"
-                          value={task.kbIndex}
-                          onChange={(e) =>
-                            updateTask(idx, "kbIndex", parseInt(e.target.value))
-                          }
-                        >
-                          {KNOWLEDGE_BASE.map((k, i) => (
-                            <option key={k.id} value={i}>
-                              {k.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-accent-light/70">
-                          Complexidade
-                        </label>
-                        <select
-                          className={`bg-gray-950 border border-gray800 rounded px-2 py-1 text-xs outline-none font-bold ${task.complexity === "alta"
-                            ? "text-red-400"
-                            : task.complexity === "media"
-                              ? "text-accent"
-                              : "text-emerald-400"
-                            }`}
-                          value={task.complexity}
-                          onChange={(e) =>
-                            updateTask(idx, "complexity", e.target.value)
-                          }
-                        >
-                          {Object.keys(
-                            KNOWLEDGE_BASE[task.kbIndex].complexities
-                          ).map((c) => (
-                            <option key={c} value={c}>
-                              {c.toUpperCase()}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-accent-light/70">
-                          UST
-                        </label>
-                        <div
-                          className={`px-2 py-1 rounded text-xs font-mono font-bold border ${badgeColor(
-                            task.complexity
-                          )}`}
-                        >
-                          {task.ustPoints}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-accent-light/70">
-                          Horas
-                        </label>
-                        <input
-                          type="number"
-                          className="w-16 bg-gray-950 border border-gray800 rounded px-2 py-1 text-xs text-center text-white"
-                          value={task.estimateMade}
-                          onChange={(e) =>
-                            updateTask(
-                              idx,
-                              "estimateMade",
-                              parseFloat(e.target.value)
-                            )
-                          }
-                        />
-                      </div>
-
-                      <button
-                        onClick={() => removeTask(idx)}
-                        className="ml-auto text-accent-light/70 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {currentStep === 3 && (
+        <Step3Review
+          tasks={tasks}
+          setTasks={setTasks}
+          loadingAi={loadingAi}
+          refineWithAI={refineWithAI}
+          exportCsv={exportCsv}
+          updateTask={updateTask}
+          removeTask={removeTask}
+          badgeColor={badgeColor}
+          onBack={() => setCurrentStep(2)}
+          onReset={() => {
+            setTasks([]);
+            setDiffInput("");
+            setCurrentStep(1);
+          }}
+        />
       )}
     </div>
   );

@@ -348,6 +348,9 @@ const fetchProjects = async (org: string, token: string): Promise<AzureProject[]
 
   try {
     const res = await fetch(url, { headers });
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`Acesso negado (${res.status}): O Token do Azure é inválido ou expirou. Verifique suas credenciais.`);
+    }
     if (!res.ok) throw new Error(`Failed to fetch projects: ${res.statusText}`);
     const data = await res.json();
     return (data.value || []).map((p: any) => ({
@@ -355,9 +358,9 @@ const fetchProjects = async (org: string, token: string): Promise<AzureProject[]
       name: p.name,
       url: p.url
     }));
-  } catch (e) {
+  } catch (e: any) {
     console.error(`[Azure Global] Error fetching projects for ${org}`, e);
-    return [];
+    throw e; // Bubble up so the login fails
   }
 };
 
@@ -367,6 +370,9 @@ const fetchRepositories = async (org: string, project: string, token: string): P
 
   try {
     const res = await fetch(url, { headers });
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`Acesso negado (${res.status}): O Token do Azure é inválido ou expirou. Verifique suas credenciais.`);
+    }
     if (!res.ok) return []; // Alguns projetos podem não ter repos configurados
     const data = await res.json();
     return (data.value || []).map((r: any) => ({
@@ -378,9 +384,9 @@ const fetchRepositories = async (org: string, project: string, token: string): P
         name: r.project.name
       }
     }));
-  } catch (e) {
+  } catch (e: any) {
     console.warn(`[Azure Global] Error fetching repos for project ${project}`, e);
-    return [];
+    throw e; // Bubble up to fail the entire discovery if auth fails
   }
 };
 
@@ -459,6 +465,9 @@ export const fetchAreaPaths = async (
 
   try {
     const res = await fetch(url, { headers });
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`Acesso negado (${res.status}): O Token do Azure é inválido ou expirou. Verifique suas credenciais.`);
+    }
     if (!res.ok) throw new Error(`Failed to fetch area paths: ${res.statusText}`);
 
     const data = await res.json();
@@ -482,7 +491,7 @@ export const fetchAreaPaths = async (
     return paths;
   } catch (e) {
     console.error(`[Azure Service] Error fetching area paths for ${project}`, e);
-    return [];
+    throw e;
   }
 };
 
@@ -505,6 +514,9 @@ export const fetchRecentCommitsForRepo = async (
 
   try {
     const res = await fetch(url, { headers });
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`Acesso negado (${res.status}): O Token do Azure é inválido ou expirou. Verifique suas credenciais.`);
+    }
     if (!res.ok) throw new Error(`Failed to fetch commits: ${res.statusText}`);
     const data = await res.json();
     return (data.value || []).map((c: any) => ({
@@ -516,7 +528,7 @@ export const fetchRecentCommitsForRepo = async (
     }));
   } catch (e) {
     console.error(`[Azure Service] Error fetching recent commits`, e);
-    return [];
+    throw e;
   }
 };
 
@@ -535,7 +547,7 @@ export const fetchWorkItemsByType = async (
   const query = `
     SELECT [System.Id], [System.Title]
     FROM WorkItems
-    WHERE [System.TeamProject] = @project
+    WHERE [System.TeamProject] = '${project}'
       AND [System.WorkItemType] = '${workItemSelected}'
       AND [System.State] <> 'Closed'
       AND [System.State] <> 'Removed'
@@ -549,6 +561,9 @@ export const fetchWorkItemsByType = async (
       body: JSON.stringify({ query }),
     });
 
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`Acesso negado (${res.status}): O Token do Azure é inválido ou expirou. Verifique suas credenciais.`);
+    }
     if (!res.ok) throw new Error(`Failed to fetch work items: ${res.statusText}`);
 
     const data = await res.json();
@@ -564,6 +579,9 @@ export const fetchWorkItemsByType = async (
     )}&fields=System.Id,System.Title&api-version=7.0`;
 
     const detailsRes = await fetch(detailsUrl, { headers });
+    if (detailsRes.status === 401 || detailsRes.status === 403) {
+      throw new Error(`Acesso negado (${detailsRes.status}): O Token do Azure é inválido ou expirou. Verifique suas credenciais.`);
+    }
     if (!detailsRes.ok) return [];
 
     const detailsData = await detailsRes.json();
@@ -573,6 +591,6 @@ export const fetchWorkItemsByType = async (
     }));
   } catch (e) {
     console.error(`[Azure Service] Error fetching work items of type ${workItemSelected}`, e);
-    return [];
+    throw e;
   }
 };
