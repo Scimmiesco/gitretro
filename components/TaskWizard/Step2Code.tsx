@@ -68,9 +68,9 @@ export const Step2Code: React.FC<Step2CodeProps> = ({
             </div>
 
             <div className="p-4 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex ">
                     {/* SOURCE: AZURE PR/COMMITS (Live Data) */}
-                    <div className="border border-accent/20 rounded-lg p-3 bg-surface shadow-inner flex flex-col gap-3 relative overflow-hidden">
+                    <div className="border border-accent/20 rounded-lg p-3 bg-surface shadow-inner flex flex-col gap-3 relative overflow-hidden w-full">
                         <div className="absolute top-0 right-0 p-2 opacity-10 text-accent">
                             <RefreshCcw size={64} />
                         </div>
@@ -184,41 +184,6 @@ export const Step2Code: React.FC<Step2CodeProps> = ({
                             )}
                         </div>
                     </div>
-
-                    {/* MANUAL SOURCE */}
-                    <div className="border border-gray800 rounded-lg p-3 bg-surface shadow-inner flex flex-col gap-3">
-                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray800">
-                            <span className="font-bold text-accent-light text-sm uppercase">Repositório Git Externo ou Github</span>
-                        </div>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
-                                    GitHub Repo (ex: facebook/react)
-                                </label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-gray-950 border border-gray800 rounded p-2 text-sm text-white focus:border-accent-light0 outline-none"
-                                    value={config.ghRepo}
-                                    onChange={(e) =>
-                                        setConfig({ ...config, ghRepo: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase text-accent-light/70 mb-1 block">
-                                    Commit SHA
-                                </label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-gray-950 border border-gray800 rounded p-2 text-sm text-white focus:border-accent-light0 outline-none"
-                                    value={config.ghCommit}
-                                    onChange={(e) =>
-                                        setConfig({ ...config, ghCommit: e.target.value })
-                                    }
-                                />
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* MANUAL DIFF INPUT */}
@@ -291,18 +256,12 @@ export const Step2Code: React.FC<Step2CodeProps> = ({
                     />
                 </div>
 
-                <div className="flex justify-end pt-4 mt-4 border-t border-gray800 grid grid-cols-2 gap-4">
-                    <button
-                        onClick={processHeuristic}
-                        className="w-full px-6 py-3 bg-surface hover:bg-gray800 border border-gray700 text-white rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
-                    >
-                        <Play size={16} /> Gerar Tarefas com Regras (Heurística)
-                    </button>
+                <div className="flex justify-end">
                     <button
                         onClick={onNext}
                         className="w-full px-6 py-3 bg-accent hover:bg-accent-light text-surface rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
                     >
-                        Gerar com Inteligência Artificial &rarr;
+                        Gerar tarefas &rarr;
                     </button>
                 </div>
             </div>
