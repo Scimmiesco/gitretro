@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Search, Github, Lock, Calendar, Cloud, User, Plus, Trash2, Link as LinkIcon, ChartNoAxesGantt, Loader2, LogIn } from 'lucide-react';
 import { Provider } from '../types';
+import { SettingsModal } from './SettingsModal';
 
 interface InputFormProps {
   onSubmit: (provider: Provider, identity: string, token: string, year: number, secondaryIdentity?: string, repoList?: string[]) => void;
@@ -27,6 +28,8 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
       if (primaryInput.trim()) {
         onSubmit(provider, primaryInput.trim(), token.trim(), year, undefined, undefined);
       }
+    } else if (provider === 'mock') {
+      onSubmit(provider, 'Demo User', 'mock-token', year, undefined, undefined);
     } else {
       // Azure
       if (orgName.trim() && secondaryInput.trim()) {
@@ -38,6 +41,9 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
 
   return (
     <div className="w-full max-w-lg bg-surface-muted rounded-md p-2 border-2 border-primary-dark animate-fade-in relative overflow-hidden">
+      <div className="absolute top-2 right-2 z-20">
+        <SettingsModal />
+      </div>
       {/* Background glow effects */}
       <div className="absolute top-10 -right-1/3 w-1/2 h-64 bg-primary/10 rounded-full blur-3xl"></div>
       <div className="absolute -bottom-20 -left-20 w-64 h-1/2 bg-primary/10 rounded-full blur-3xl"></div>
@@ -49,7 +55,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
           </h1>
 
           <div className={`rounded-md flex items-center justify-center transform transition-all duration-300`}>
-            {provider === 'github' ? <Github size={32} className="" /> : <ChartNoAxesGantt size={48} className="" />}
+            {provider === 'github' ? <Github size={32} className="" /> : provider === 'mock' ? <ChartNoAxesGantt size={48} className="text-purple-400" /> : <ChartNoAxesGantt size={48} className="" />}
           </div>
         </div>
 
@@ -77,11 +83,25 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
         >
           GitHub
         </button>
+        <button
+          type="button"
+          onClick={() => setProvider('mock')}
+          className={`
+            flex-1 py-2.5 text-sm font-semibold rounded-md transition-all
+            ${provider === 'mock' ? 'bg-gradient-to-r from-purple-600 to-purple-800' : ''} text-accent-light hover:brightness-125 hover:backdrop-brightness-125`}
+        >
+          Demo
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
 
-        {provider === 'github' ? (
+        {provider === 'mock' ? (
+          <div className="space-y-4 text-center py-4">
+            <p className="text-accent-light font-bold">Modo de Demonstração</p>
+            <p className="text-sm text-accent-light/70">Explore as funcionalidades do DevCenter usando dados fictícios. Nenhum token é necessário.</p>
+          </div>
+        ) : provider === 'github' ? (
           <div className="space-y-2">
             <label htmlFor="primary" className="text-xs font-bold uppercase tracking-wider text-accent-light ml-1">
               Usuário do GitHub
@@ -156,23 +176,25 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
               </select>
             </div>
           </div>
-          <div className="space-y-2">
-            <label htmlFor="token" className="text-xs font-bold uppercase tracking-wider text-accent-light ml-1">
-              Token <span className="text-accent uppercase font-bold text-xs font-mono">({provider === 'azure' ? 'Obrigatório' : 'Opcional'})</span>
-            </label>
-            <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-accent-light group-focus-within:text-accent transition-colors" size={20} />
-              <input
-                id="token"
-                type="password"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                required={provider === 'azure'}
-                placeholder={provider === 'github' ? "ghp_..." : "Personal Access Token"}
-                className={`w-full !pl-10 ${provider === 'azure' ? 'focus:ring-accent/50 focus:border-accent' : 'focus:ring-gray-700 focus:border-accent-light/70'}`}
-              />
+          {provider !== 'mock' && (
+            <div className="space-y-2">
+              <label htmlFor="token" className="text-xs font-bold uppercase tracking-wider text-accent-light ml-1">
+                Token <span className="text-accent uppercase font-bold text-xs font-mono">({provider === 'azure' ? 'Obrigatório' : 'Opcional'})</span>
+              </label>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-accent-light group-focus-within:text-accent transition-colors" size={20} />
+                <input
+                  id="token"
+                  type="password"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  required={provider === 'azure'}
+                  placeholder={provider === 'github' ? "ghp_..." : "Personal Access Token"}
+                  className={`w-full !pl-10 ${provider === 'azure' ? 'focus:ring-accent/50 focus:border-accent' : 'focus:ring-gray-700 focus:border-accent-light/70'}`}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <button
@@ -183,7 +205,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, loading }) => {
              font-bold rounded-md transition-all 
              active:scale-[0.98] flex justify-center items-center text-lg 
              ${loading ? 'opacity-70 cursor-not-allowed' : ''} 
-             ${provider === 'github' ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' : 'bg-gradient-to-r from-primary to-primary-dark hover:from-primary-hover hover:to-primary-dark'}`}
+             ${provider === 'github' ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' : provider === 'mock' ? 'bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700' : 'bg-gradient-to-r from-primary to-primary-dark hover:from-primary-hover hover:to-primary-dark'}`}
         >
           {loading ? (
             <span className="flex items-center">

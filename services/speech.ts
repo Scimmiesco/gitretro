@@ -6,9 +6,9 @@ export interface SpeechResponse {
 
 export const generateSpeechWithAI = async (prompt: string): Promise<SpeechResponse> => {
     // Check for key in likely places
-    const apiKey = (import.meta as any).env?.VITE_DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY;
+    const apiKey = localStorage.getItem('deepseek_api_key') || (import.meta as any).env?.VITE_DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY;
 
-    if (!apiKey) throw new Error("API Key (VITE_DEEPSEEK_API_KEY) não configurada.");
+    if (!apiKey) throw new Error("API Key não configurada. Defina em Configurações.");
 
     try {
         // Using the proxy setup in vite.config.ts -> /deepseek-api -> https://api.deepseek.com

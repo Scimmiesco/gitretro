@@ -77,6 +77,27 @@ const TaskGenerator: React.FC<TaskGeneratorProps> = ({
   }, []);
 
   useEffect(() => {
+    if (provider === 'mock') {
+      setDiffInput(`diff --git a/src/components/Login.tsx b/src/components/Login.tsx
+index 83a0d3f..b148c2a 100644
+--- a/src/components/Login.tsx
++++ b/src/components/Login.tsx
+@@ -12,4 +12,5 @@
+-    const token = localStorage.getItem('token');
++    const token = sessionStorage.getItem('token');
++    // Added extra validation for demo
+`);
+      setDescInput("Fix login token storage to use session storage instead of local storage for better security.");
+      setConfig((prev) => ({
+        ...prev,
+        areaPath: "Mock\\\\Area",
+        iterationPath: "Mock\\\\Iteration",
+        contractItem: "Mock-123",
+      }));
+    }
+  }, [provider]);
+
+  useEffect(() => {
     if (selectedRepos && selectedRepos.length > 0 && !selectedRepoId) {
       setSelectedRepoId(selectedRepos[0].id);
     }

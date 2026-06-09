@@ -104,9 +104,8 @@ export const fetchAzureCommitDiff = async (repoUrl: string, commitSha: string, t
 // --- AI REFINEMENT ---
 export const refineTaskWithAI = async (description: string, diffSummary: string) => {
     // Check for key in likely places
-    const apiKey = (import.meta as any).env?.VITE_DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY;
-
-    if (!apiKey) throw new Error("API Key (VITE_DEEPSEEK_API_KEY) não configurada.");
+    const apiKey = localStorage.getItem('deepseek_api_key') || (import.meta as any).env?.VITE_DEEPSEEK_API_KEY || process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) throw new Error("API Key não configurada. Defina em Configurações.");
 
     const prompt = `
         Aja como Tech Lead. Quebre o trabalho a seguir em tarefas faturáveis.

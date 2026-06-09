@@ -5,10 +5,12 @@ import Dashboard from './components/Dashboard';
 import { YearStats, Provider, GitHubApiCommitItem, AzureApiCommitItem, UserContext, AzureRepository } from './types';
 import { fetchCommitsForPeriod } from './services/github';
 import { fetchAzureCommits, discoverRepositories, fetchCommitsForRepos } from './services/azure';
+import { fetchMockCommits } from './services/mock';
 import { parseCommits, analyzeCommits } from './utils/analyzer';
 import { RepositorySelector } from './components/RepositorySelector';
 import { DateRangeSelector, DateRange } from './components/DateRangeSelector';
 import ThemeSelector from './components/ThemeSelector';
+import { SettingsModal } from './components/SettingsModal';
 import { Folder } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -113,6 +115,8 @@ const App: React.FC = () => {
           let rawIds = [];
           if (provider === 'github') {
             rawIds = await fetchCommitsForPeriod(identity, q.start, q.end, token);
+          } else if (provider === 'mock') {
+            rawIds = await fetchMockCommits(q.start, q.end);
           } else if (org && repos && aliases) {
             rawIds = await fetchCommitsForRepos(org, repos, aliases, q.start, q.end, token);
           }
@@ -153,10 +157,10 @@ const App: React.FC = () => {
     setCurrentToken(token);
 
     try {
-      if (provider === 'github') {
+      if (provider === 'github' || provider === 'mock') {
         setIdentity(primaryInput);
-        // Direct Smart Fetch for GitHub
-        await smartFetch(dateRange, 'github', token, primaryInput);
+        // Direct Smart Fetch for GitHub and Mock
+        await smartFetch(dateRange, provider, token, primaryInput);
         setIsConnected(true);
       } else {
         // Azure Discovery... (No fetch yet)
@@ -190,8 +194,8 @@ const App: React.FC = () => {
     setDateRange(r);
     // Trigger Smart Fetch immediately
     if (isConnected) {
-      if (currentProvider === 'github') {
-        await smartFetch(r, 'github', currentToken!, identity);
+      if (currentProvider === 'github' || currentProvider === 'mock') {
+        await smartFetch(r, currentProvider, currentToken!, identity);
       } else if (azureConfig && selectedRepoIds.length > 0) {
         const selectedRepos = availableRepos.filter(repo => selectedRepoIds.includes(repo.id));
         await smartFetch(r, 'azure', azureConfig!.token, identity, azureConfig!.org, selectedRepos, azureConfig!.aliases);
@@ -239,7 +243,10 @@ const App: React.FC = () => {
               >
                 &larr; Nova Conexão
               </button>
-              <ThemeSelector />
+              <div className="flex gap-2">
+                <SettingsModal />
+                <ThemeSelector />
+              </div>
             </div>
 
             {/* GLOBAL CONFIGURATION BAR: Date & Repo Context */}

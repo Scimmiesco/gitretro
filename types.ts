@@ -133,7 +133,7 @@ export interface SearchResponse {
   items: GitHubApiCommitItem[];
 }
 
-export type Provider = 'github' | 'azure';
+export type Provider = 'github' | 'azure' | 'mock';
 
 export type SeniorityLevel = 'Intern' | 'Junior' | 'Mid-Level' | 'Senior';
 export type RoleType = 'Frontend' | 'Backend' | 'Fullstack';
